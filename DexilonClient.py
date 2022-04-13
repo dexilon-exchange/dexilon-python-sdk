@@ -27,7 +27,7 @@ class DexilonClient():
         pass
 
 
-    def limit_order(self,  client_order_id: str, symbol: str, side: str, price: float, size: float) -> str:
+    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float) -> str:
         """
         Submit new limit order
         :param client_order_id: generated on client side order id
@@ -89,3 +89,9 @@ class DexilonClient():
         :return: AvailableSymbol[]
         """
         pass
+
+    def get_orderbook(self, symbol:str) -> []:
+        """
+        Get latest orderbook by symbol
+        :return:
+        """

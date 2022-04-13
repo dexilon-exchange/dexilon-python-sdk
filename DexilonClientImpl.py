@@ -4,7 +4,11 @@ from web3.auto import w3
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 
+from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
+from OrderBook import OrderBook
+from OrderBookInfo import OrderBookInfo
+from OrderInfo import OrderInfo
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 
 
@@ -14,6 +18,8 @@ class DexilonClientImpl(DexilonClient):
     JWT_KEY = ''
 
     pk1 = ''
+
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
     def __init__(self, metamask_address, api_secret):
         """ Dexilon API Client constructor
@@ -41,10 +47,103 @@ class DexilonClientImpl(DexilonClient):
 
         self.API_URL = api_url
 
+    def get_open_orders(self) -> []:
+        orders_response = {}
+        self.check_authentication()
+        r = requests.get(self.API_URL + '/orders/open', headers=self.headers)
+        open_orders_response = self._handle_response(r)
+        open_orders_by_symbol = open_orders_response['body']
+        for orders_by_symbol in open_orders_by_symbol:
+            symbol = orders_by_symbol['symbol']
+            order_list = orders_by_symbol['orders']
+            orders_response[symbol] = []
+            for order in order_list:
+                order_info = OrderInfo(order['id'], order['type'], order['amount'], order['price'], order['side'], order['placedAt'])
+                orders_response[symbol].append(order_info)
+        return orders_response
+
+    def market_order(self, client_order_id: str, symbol: str, side: str, size: float) -> str:
+        self.check_authentication()
+        json_request_body = {'clientorderId': client_order_id, 'symbol' : symbol, 'side' : side, 'size' : size}
+        r = requests.post(self.API_URL + '/orders/market', headers=self.headers, json=json_request_body)
+        market_order_response = self._handle_response(r)
+        market_order_id = market_order_response['body']['orderId']
+        return market_order_id
+
+    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float) -> str:
+        self.check_authentication()
+        json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size, 'price': price}
+        r = requests.post(self.API_URL + '/orders/limit', headers=self.headers, json=json_request_body)
+        limit_order_response = self._handle_response(r)
+        limit_order_id = limit_order_response['body']['orderId']
+        return limit_order_id
+
+    def get_max_available_for_sell(self, symbol: str) -> float:
+        self.check_authentication()
+        get_parameters = {'symbol': symbol}
+        r = requests.get(self.API_URL + '/orders/getMaxAvailableToSell', headers=self.headers, data=get_parameters)
+        max_available_for_sell_response = self._handle_response(r)
+        return max_available_for_sell_response['body']['value']
+
+    def get_max_available_for_buy(self, symbol: str) -> float:
+        self.check_authentication()
+        get_parameters = {'symbol': symbol}
+        r = requests.get(self.API_URL + '/orders/getMaxAvailableToBuy', headers=self.headers, data=get_parameters)
+        max_available_for_buy_response = self._handle_response(r)
+        return max_available_for_buy_response['body']['value']
+
+    def cancel_all_orders(self) -> bool:
+        self.check_authentication()
+        r = requests.delete(self.API_URL + '/orders/batch', headers=self.headers)
+        cancel_all_orders_response = self._handle_response(r)
+        return cancel_all_orders_response['body']['value']
+
+
+    def cancel_order(self, order_id: str, symbol: str) -> bool:
+        self.check_authentication()
+        cancel_order_request_body = {'symbol': symbol, 'orderId' : order_id}
+        r = requests.delete(self.API_URL + '/orders', headers=self.headers, json=cancel_order_request_body)
+        cancel_order_response = self._handle_response(r)
+        return cancel_order_response['body']['value']
+
+    def get_all_symbols(self) -> []:
+        r = requests.get(self.API_URL + '/symbols', headers=self.headers)
+        all_symbols_response = self._handle_response(r)
+        available_symbols = []
+        all_symbols_list = all_symbols_response['body']
+        for symbol in all_symbols_list:
+            available_symbols.append(AvailableSymbol(symbol['symbol'], symbol['isFavorite'], symbol['lastPrice'], symbol['volume'], symbol['price24Percentage']))
+        return available_symbols
+
+    def get_orderbook(self, symbol:str) -> []:
+        orderbook_request = {'symbol': symbol}
+        r = requests.get(self.API_URL + '/orders/book', headers=self.headers, data=orderbook_request)
+        orderbooks_response = self._handle_response(r)
+        all_orderbook_values = orderbooks_response['body']
+
+        return OrderBookInfo(self.parse_order_books('asks', all_orderbook_values), self.parse_order_books('bids', all_orderbook_values), DateTime())
+
+
+    def parse_order_books(self, type: str, data_holder) -> []:
+        data_entries = data_holder[type]
+        result = []
+        for data_entry in data_entries:
+            result.append(OrderBook(data_entry['price'], data_entry['size'], data_entry['sum']))
+
+        return result
+
+
+    def check_authentication(self):
+        if len(self.JWT_KEY) == 0:
+            self.JWT_KEY = self.authenticate()
+
+    def reauthenticate(self):
+        self.JWT_KEY = self.authenticate()
+
+
     def authenticate(self):
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         payload = {'metamaskAddress': self.METAMASK_ADDRESS}
-        r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=headers)
+        r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=self.headers)
         nonce_response = self._handle_response(r)
         nonce = nonce_response['body']['nonce']
         if len(nonce) == 0:
@@ -59,16 +158,18 @@ class DexilonClientImpl(DexilonClient):
 
         print(signature_payload)
 
-        auth_response = requests.post(self.API_URL + '/auth/finishAuth', json=signature_payload, headers=headers)
+        auth_response = requests.post(self.API_URL + '/auth/finishAuth', json=signature_payload, headers=self.headers)
 
         auth_info = self._handle_response(auth_response)
 
-        if auth_info['body']['jwt'] is None or len(auth_info['body']['jwt']) == 0:
+        jwk_token = auth_info['body']['jwt']
+        if jwk_token is None or len(jwk_token) == 0:
             raise DexilonAuthException('Was not able to obtain JWT token for authentication')
 
         print(auth_info)
+        self.headers['jwt'] = jwk_token
 
-        return auth_info['body']['jwt']
+        return jwk_token
 
     def _handle_response(self, response):
         """Internal helper for handling API responses from the Binance server.
