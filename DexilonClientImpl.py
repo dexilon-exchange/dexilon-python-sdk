@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests as requests
 
 from web3.auto import w3
@@ -33,8 +35,6 @@ class DexilonClientImpl(DexilonClient):
         self.METAMASK_ADDRESS = metamask_address
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
-
-        self.jwtToken = self.authenticate()
 
     def change_api_url(self, api_url):
         """
@@ -88,7 +88,7 @@ class DexilonClientImpl(DexilonClient):
     def get_max_available_for_buy(self, symbol: str) -> float:
         self.check_authentication()
         get_parameters = {'symbol': symbol}
-        r = requests.get(self.API_URL + '/orders/getMaxAvailableToBuy', headers=self.headers, data=get_parameters)
+        r = requests.get(self.API_URL + '/orders/getMaxAvailableToBuy', headers=self.headers, params=get_parameters)
         max_available_for_buy_response = self._handle_response(r)
         return max_available_for_buy_response['body']['value']
 
@@ -117,11 +117,11 @@ class DexilonClientImpl(DexilonClient):
 
     def get_orderbook(self, symbol:str) -> []:
         orderbook_request = {'symbol': symbol}
-        r = requests.get(self.API_URL + '/orders/book', headers=self.headers, data=orderbook_request)
+        r = requests.get(self.API_URL + '/orders/book', headers=self.headers, params=orderbook_request)
         orderbooks_response = self._handle_response(r)
         all_orderbook_values = orderbooks_response['body']
 
-        return OrderBookInfo(self.parse_order_books('asks', all_orderbook_values), self.parse_order_books('bids', all_orderbook_values), DateTime())
+        return OrderBookInfo(self.parse_order_books('ask', all_orderbook_values), self.parse_order_books('bid', all_orderbook_values), datetime.now())
 
 
     def parse_order_books(self, type: str, data_holder) -> []:
@@ -135,11 +135,7 @@ class DexilonClientImpl(DexilonClient):
 
     def check_authentication(self):
         if len(self.JWT_KEY) == 0:
-            self.JWT_KEY = self.authenticate()
-
-    def reauthenticate(self):
-        self.JWT_KEY = self.authenticate()
-
+            self.authenticate()
 
     def authenticate(self):
         payload = {'metamaskAddress': self.METAMASK_ADDRESS}
@@ -167,9 +163,10 @@ class DexilonClientImpl(DexilonClient):
             raise DexilonAuthException('Was not able to obtain JWT token for authentication')
 
         print(auth_info)
-        self.headers['jwt'] = jwk_token
+        self.headers['Authorization'] = 'Bearer ' + jwk_token
+        self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
 
-        return jwk_token
+        self.JWT_KEY = jwk_token
 
     def _handle_response(self, response):
         """Internal helper for handling API responses from the Binance server.

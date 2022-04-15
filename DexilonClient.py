@@ -7,7 +7,6 @@ class DexilonClient():
         Returns full list of open orders
         :return: OrdersBySymbol[]
         """
-
         pass
 
 
