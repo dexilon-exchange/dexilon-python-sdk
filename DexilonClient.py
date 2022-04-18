@@ -1,3 +1,4 @@
+from MarginData import MarginData
 
 
 class DexilonClient():
@@ -43,23 +44,10 @@ class DexilonClient():
         """
         pass
 
-
-    def get_max_available_for_sell(self, symbol:str) -> float:
+    def get_margin(self) -> MarginData:
         """
-        Get maximum available amount for sell by symbol
-        :param symbol: symbol to get max amount available for sell
-        :type symbol: str.
-        :return: float available amount by symbol
-        """
-        pass
-
-
-    def get_max_available_to_buy(self, symbol:str) -> float:
-        """
-        Get maximum available amount for buy by symbol
-        :param symbol: symbol to get max amount available for buy
-        :type symbol: str.
-        :return: float available amount by symbol
+        :return:
+        MarginData
         """
         pass
 

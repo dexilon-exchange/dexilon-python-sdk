@@ -11,3 +11,13 @@ class TestAuthentication:
     def test_should_authenticate(self):
         self.test_instance.authenticate()
         assert self.test_instance.JWT_KEY != ''
+
+    def test_should_reauthenticate_on_request_if_token_expired(self):
+        self.test_instance.authenticate()
+        self.test_instance.JWT_KEY = 'CHANGED_GWT_KEY'
+        self.test_instance.headers['Authorization'] = 'Bearer + ' + self.test_instance.JWT_KEY
+        margin = self.test_instance.get_margin()
+        assert margin is not None
+
+# self.headers['Authorization'] = 'Bearer ' + jwk_token
+#         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS

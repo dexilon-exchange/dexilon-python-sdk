@@ -8,6 +8,7 @@ from eth_keys import keys
 
 from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
+from MarginData import MarginData
 from OrderBook import OrderBook
 from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
@@ -78,33 +79,20 @@ class DexilonClientImpl(DexilonClient):
         limit_order_id = limit_order_response['body']['orderId']
         return limit_order_id
 
-    def get_max_available_for_sell(self, symbol: str) -> float:
-        self.check_authentication()
-        get_parameters = {'symbol': symbol}
-        r = requests.get(self.API_URL + '/orders/getMaxAvailableToSell', headers=self.headers, data=get_parameters)
-        max_available_for_sell_response = self._handle_response(r)
-        return max_available_for_sell_response['body']['value']
-
-    def get_max_available_for_buy(self, symbol: str) -> float:
-        self.check_authentication()
-        get_parameters = {'symbol': symbol}
-        r = requests.get(self.API_URL + '/orders/getMaxAvailableToBuy', headers=self.headers, params=get_parameters)
-        max_available_for_buy_response = self._handle_response(r)
-        return max_available_for_buy_response['body']['value']
-
     def cancel_all_orders(self) -> bool:
         self.check_authentication()
         r = requests.delete(self.API_URL + '/orders/batch', headers=self.headers)
         cancel_all_orders_response = self._handle_response(r)
-        return cancel_all_orders_response['body']['value']
+        return cancel_all_orders_response['errors'] is None
 
 
     def cancel_order(self, order_id: str, symbol: str) -> bool:
         self.check_authentication()
         cancel_order_request_body = {'symbol': symbol, 'orderId' : order_id}
-        r = requests.delete(self.API_URL + '/orders', headers=self.headers, json=cancel_order_request_body)
+        r = requests.delete(self.API_URL + '/orders', headers=self.headers, params=cancel_order_request_body)
         cancel_order_response = self._handle_response(r)
-        return cancel_order_response['body']['value']
+        return cancel_order_response['errors'] is None
+    # {'body': {'eventType': 'REJECTED', 'event': {'cause': 'Order has been executed'}}, 'errors': None, 'debugInfo': None}
 
     def get_all_symbols(self) -> []:
         r = requests.get(self.API_URL + '/symbols', headers=self.headers)
@@ -122,6 +110,14 @@ class DexilonClientImpl(DexilonClient):
         all_orderbook_values = orderbooks_response['body']
 
         return OrderBookInfo(self.parse_order_books('ask', all_orderbook_values), self.parse_order_books('bid', all_orderbook_values), datetime.now())
+
+    def get_margin(self) -> MarginData:
+        self.check_authentication()
+        r = requests.get(self.API_URL + '/margin', headers=self.headers)
+        margin_response = self._handle_response(r)
+
+        return MarginData(margin_response['body']['margin'], margin_response['body']['upl'], margin_response['body']['equity'], margin_response['body']['lockedBalanceForOpenOrders'])
+
 
 
     def parse_order_books(self, type: str, data_holder) -> []:
