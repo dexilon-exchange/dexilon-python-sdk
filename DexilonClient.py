@@ -1,14 +1,27 @@
+from typing import List
+
+from AvailableSymbol import AvailableSymbol
 from MarginData import MarginData
+from OrderBookInfo import OrderBookInfo
+from OrderInfo import OrderInfo
 
 
 class DexilonClient():
 
-    def get_open_orders(self) -> []:
+    def get_open_orders(self) -> List[OrderInfo]:
         """
         Returns full list of open orders
         :return: OrdersBySymbol[]
         """
         pass
+
+    def get_order_info(self, order_id: str) -> OrderInfo:
+        """
+        Returns order information by orderId
+        :param order_id: Dexilon order id
+        :type order_id: str
+        :return: OrderInfo
+        """
 
 
     def market_order(self, client_order_id: str, symbol: str, side: str, size: float) -> str:
@@ -70,15 +83,15 @@ class DexilonClient():
         pass
 
 
-    def get_all_symbols(self) -> []:
+    def get_all_symbols(self) -> List[AvailableSymbol]:
         """
         Get all available symbols
         :return: AvailableSymbol[]
         """
         pass
 
-    def get_orderbook(self, symbol:str) -> []:
+    def get_orderbook(self, symbol: str) -> OrderBookInfo:
         """
         Get latest orderbook by symbol
-        :return:
+        :return: OrderBookInfo
         """

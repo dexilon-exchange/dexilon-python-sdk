@@ -13,6 +13,7 @@ from OrderBook import OrderBook
 from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
+from typing import List
 
 
 class DexilonClientImpl(DexilonClient):
@@ -48,7 +49,7 @@ class DexilonClientImpl(DexilonClient):
 
         self.API_URL = api_url
 
-    def get_open_orders(self) -> []:
+    def get_open_orders(self) -> List[OrderInfo]:
         orders_response = {}
         self.check_authentication()
         r = requests.get(self.API_URL + '/orders/open', headers=self.headers)
@@ -62,6 +63,10 @@ class DexilonClientImpl(DexilonClient):
                 order_info = OrderInfo(order['id'], order['type'], order['amount'], order['price'], order['side'], order['placedAt'])
                 orders_response[symbol].append(order_info)
         return orders_response
+
+    def get_order_info(self, order_id: str) -> OrderInfo:
+        # coming soon
+        pass
 
     def market_order(self, client_order_id: str, symbol: str, side: str, size: float) -> str:
         self.check_authentication()
@@ -94,7 +99,7 @@ class DexilonClientImpl(DexilonClient):
         return cancel_order_response['errors'] is None
     # {'body': {'eventType': 'REJECTED', 'event': {'cause': 'Order has been executed'}}, 'errors': None, 'debugInfo': None}
 
-    def get_all_symbols(self) -> []:
+    def get_all_symbols(self) -> List[AvailableSymbol]:
         r = requests.get(self.API_URL + '/symbols', headers=self.headers)
         all_symbols_response = self._handle_response(r)
         available_symbols = []
@@ -103,7 +108,7 @@ class DexilonClientImpl(DexilonClient):
             available_symbols.append(AvailableSymbol(symbol['symbol'], symbol['isFavorite'], symbol['lastPrice'], symbol['volume'], symbol['price24Percentage']))
         return available_symbols
 
-    def get_orderbook(self, symbol:str) -> []:
+    def get_orderbook(self, symbol:str) -> OrderBookInfo:
         orderbook_request = {'symbol': symbol}
         r = requests.get(self.API_URL + '/orders/book', headers=self.headers, params=orderbook_request)
         orderbooks_response = self._handle_response(r)
@@ -120,7 +125,7 @@ class DexilonClientImpl(DexilonClient):
 
 
 
-    def parse_order_books(self, type: str, data_holder) -> []:
+    def parse_order_books(self, type: str, data_holder) -> List[OrderBook]:
         data_entries = data_holder[type]
         result = []
         for data_entry in data_entries:
@@ -165,7 +170,7 @@ class DexilonClientImpl(DexilonClient):
         self.JWT_KEY = jwk_token
 
     def _handle_response(self, response):
-        """Internal helper for handling API responses from the Binance server.
+        """Internal helper for handling API responses from the Dexilon server.
         Raises the appropriate exceptions when necessary; otherwise, returns the
         response.
         """
