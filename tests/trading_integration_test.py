@@ -27,3 +27,11 @@ class TestTradingIntegration:
     def test_should_get_margin(self):
         margin_data = self.test_instance.get_margin()
         assert margin_data is not None
+
+    def test_should_get_all_open_orders(self):
+        open_orders = self.test_instance.get_open_orders()
+        assert len(open_orders) > 0
+
+    def test_should_get_order_info(self):
+        order_info = self.test_instance.get_order_info('TESTORDERID')
+        assert order_info is not None

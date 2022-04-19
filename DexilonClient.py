@@ -1,6 +1,7 @@
 from typing import List
 
 from AvailableSymbol import AvailableSymbol
+from FullOrderInfo import FullOrderInfo
 from MarginData import MarginData
 from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
@@ -15,12 +16,14 @@ class DexilonClient():
         """
         pass
 
-    def get_order_info(self, order_id: str) -> OrderInfo:
+    def get_order_info(self, order_id: str, symbol: str) -> FullOrderInfo:
         """
         Returns order information by orderId
         :param order_id: Dexilon order id
         :type order_id: str
-        :return: OrderInfo
+        :param symbol: order symbol
+        :type symbol: str
+        :return: FullOrderInfo
         """
 
 
