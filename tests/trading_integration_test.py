@@ -1,4 +1,7 @@
 from DexilonClientImpl import DexilonClientImpl
+from ErrorInfo import ErrorInfo
+from FullOrderInfo import FullOrderInfo
+from OrderErrorInfo import OrderErrorInfo
 
 
 class TestTradingIntegration:
@@ -9,12 +12,20 @@ class TestTradingIntegration:
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
 
     def test_create_market_order(self):
-        order_id = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 0.10)
-        assert len(order_id) > 0
+        full_order_info = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 0.10)
+        assert isinstance(full_order_info, FullOrderInfo) and full_order_info.order_id is not None
+
+    def test_create_market_order_with_rejected_state(self):
+        order_submit_result = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 100.00)
+        assert isinstance(order_submit_result, OrderErrorInfo)
 
     def test_create_limit_order(self):
-        order_id = self.test_instance.limit_order('TEST_MARKET_ORDER_2', 'eth_usdc', 'BUY', 3200.0, 0.1)
-        assert len(order_id) > 0
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 3200.0, 0.1)
+        assert isinstance(full_order_info, FullOrderInfo) and full_order_info.order_id is not None
+
+    def test_create_limit_order_with_rejected_state(self):
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 3200.0, 100.0)
+        assert isinstance(full_order_info, OrderErrorInfo)
 
     def test_should_cancel_all_orders(self):
         result = self.test_instance.cancel_all_orders()
@@ -22,7 +33,14 @@ class TestTradingIntegration:
 
     def test_should_cancel_order(self):
         result = self.test_instance.cancel_order('TESTORDERID', 'eth_usdc')
-        assert result
+        assert isinstance(result, OrderErrorInfo)
+
+    def test_should_create_and_cancel_order_sucessfully(self):
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
+        assert isinstance(full_order_info, FullOrderInfo)
+        canceled_order_info = self.test_instance.cancel_order(full_order_info.order_id, full_order_info.symbol)
+        assert isinstance(canceled_order_info, FullOrderInfo)
+
 
     def test_should_get_margin(self):
         margin_data = self.test_instance.get_margin()
@@ -33,5 +51,21 @@ class TestTradingIntegration:
         assert len(open_orders) > 0
 
     def test_should_get_order_info(self):
-        order_info = self.test_instance.get_order_info('TESTORDERID')
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
+
+        order_info = self.test_instance.get_order_info(full_order_info.order_id, full_order_info.symbol)
         assert order_info is not None
+        cancel_result = self.test_instance.cancel_order(order_info.order_id, order_info.symbol)
+        assert cancel_result
+
+    def test_should_error_on_cancel_wrong_order(self):
+        cancel_result = self.test_instance.cancel_order('RANDOMID1', 'eth_usdc')
+        assert isinstance(cancel_result, OrderErrorInfo)
+
+    def test_should_parse_response_for_illegal_char_in_cancel_request(self):
+        cancel_result = self.test_instance.cancel_order('RANDOM_ID_1', 'eth_usdc')
+        assert isinstance(cancel_result, ErrorInfo)
+
+    def test_should_process_error_for_market_order_submit(self):
+        order_id = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 0.10)
+        assert len(order_id) > 0

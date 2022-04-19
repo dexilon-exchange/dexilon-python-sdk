@@ -27,7 +27,7 @@ class DexilonClient():
         """
 
 
-    def market_order(self, client_order_id: str, symbol: str, side: str, size: float) -> str:
+    def market_order(self, client_order_id: str, symbol: str, side: str, size: float):
         """
         Submit new market order
         :param client_order_id: generated on client side order id
@@ -43,7 +43,7 @@ class DexilonClient():
         pass
 
 
-    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float) -> str:
+    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float):
         """
         Submit new limit order
         :param client_order_id: generated on client side order id
@@ -76,7 +76,7 @@ class DexilonClient():
         pass
 
 
-    def cancel_order(self, order_id: str, symbol: str) -> bool:
+    def cancel_order(self, order_id: str, symbol: str):
         """
         Cancel specific order by order id and symbol
         :param order_id: str

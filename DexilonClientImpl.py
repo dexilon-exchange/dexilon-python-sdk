@@ -8,10 +8,12 @@ from eth_keys import keys
 
 from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
+from ErrorInfo import ErrorInfo
 from FullOrderInfo import FullOrderInfo
 from MarginData import MarginData
 from OrderBook import OrderBook
 from OrderBookInfo import OrderBookInfo
+from OrderErrorInfo import OrderErrorInfo
 from OrderInfo import OrderInfo
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from typing import List
@@ -69,35 +71,82 @@ class DexilonClientImpl(DexilonClient):
         self.check_authentication()
         get_order_info_request_params = {'symbol': symbol, 'orderId': order_id}
         order_info_response = self.request_get('/orders', get_order_info_request_params)
-        return FullOrderInfo(order_info_response['body']['symbol'], order_info_response['body']['orderId'], order_info_response['body']['price'], order_info_response['body']['amount'],
-                             order_info_response['body']['filledAmount'], order_info_response['body']['avgPrice'], order_info_response['body']['type'], order_info_response['body']['side'], order_info_response['body']['status'],
+        if 'body' in order_info_response:
+            order_info_body = order_info_response['body']
+            # TODO add client_order_id
+            return FullOrderInfo('',
+                                 self.parse_value_or_return_None(order_info_body, 'symbol'),
+                                 self.parse_value_or_return_None(order_info_body, 'orderId'),
+                                 self.parse_value_or_return_None(order_info_body, 'price'),
+                                 self.parse_value_or_return_None(order_info_body, 'amount'),
+                                 self.parse_value_or_return_None(order_info_body, 'filledAmount'),
+                                 self.parse_value_or_return_None(order_info_body, 'avgPrice'),
+                                 self.parse_value_or_return_None(order_info_body, 'type'),
+                                 self.parse_value_or_return_None(order_info_body, 'side'),
+                                 self.parse_value_or_return_None(order_info_body, 'status'),
+                                 self.parse_value_or_return_None(order_info_body, 'createdAt'),
+                                 self.parse_value_or_return_None(order_info_body, 'updatedAt')
+                                 )
+
+        return FullOrderInfo('', order_info_response['body']['symbol'], order_info_response['body']['orderId'],
+                             order_info_response['body']['price'], order_info_response['body']['amount'],
+                             order_info_response['body']['filledAmount'], order_info_response['body']['avgPrice'],
+                             order_info_response['body']['type'], order_info_response['body']['side'],
+                             order_info_response['body']['status'], order_info_response['body']['createdAt'], order_info_response['body']['updatedAt']
                              )
 
-    def market_order(self, client_order_id: str, symbol: str, side: str, size: float) -> str:
+    def market_order(self, client_order_id: str, symbol: str, side: str, size: float):
         self.check_authentication()
         json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size}
         market_order_response = self.request_post('/orders/market', **json_request_body)
-        market_order_id = market_order_response['body']['orderId']
-        return market_order_id
+        return self.parse_order_info_response(market_order_response, 'MARKET', client_order_id)
 
-    # {'eventType': 'REJECTED', 'event': {'cause': "User don't have enough balance for market order execution"}}
+    def parse_order_info_response(self, order_info_response, order_type, client_order_id):
+        if 'errors' in order_info_response and order_info_response['errors'] is not None:
+            errors = order_info_response['errors']
+            return ErrorInfo(self.parse_value_or_return_None(errors, 'code'), self.parse_value_or_return_None(errors, 'message'))
+        if 'body' in order_info_response:
+            if 'eventType' in order_info_response['body']:
+                eventType = order_info_response['body']['eventType']
+                if eventType in ['EXECUTED', 'PARTIALLY_EXECUTED', 'APPLIED']:
+                    order_data = order_info_response['body']['event']
+                    return FullOrderInfo(client_order_id, self.parse_value_or_return_None(order_data, 'symbol'),
+                                         self.parse_value_or_return_None(order_data, 'orderId'),
+                                         self.parse_value_or_return_None(order_data, 'price'),
+                                         self.parse_value_or_return_None(order_data, 'size'),
+                                         self.parse_value_or_return_None(order_data, 'filled'),
+                                         self.parse_value_or_return_None(order_data, 'avgPrice'),
+                                         order_type,
+                                         self.parse_value_or_return_None(order_data, 'side'),
+                                         eventType,
+                                         self.parse_value_or_return_None(order_data, 'placedAt'),
+                                         self.parse_value_or_return_None(order_data, 'placedAt')
+                                         )
+                if 'REJECTED' == eventType:
+                    order_error_data = order_info_response['body']['event']
+                    return OrderErrorInfo(client_order_id, '', eventType, order_error_data['cause'])
 
-    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float) -> str:
+    def parse_value_or_return_None(self, object_to_parse, param_name):
+        if param_name in object_to_parse:
+            return object_to_parse[param_name]
+        else:
+            return None
+
+    def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float):
         self.check_authentication()
         json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size,
                              'price': price}
         limit_order_response = self.request_post('/orders/limit', **json_request_body)
-        limit_order_id = limit_order_response['body']['orderId']
-        return limit_order_id
+        return self.parse_order_info_response(limit_order_response, 'LIMIT', client_order_id)
 
     def cancel_all_orders(self) -> bool:
         cancel_all_orders_response = self.request_delete('/orders/batch')
         return cancel_all_orders_response['errors'] is None
 
-    def cancel_order(self, order_id: str, symbol: str) -> bool:
+    def cancel_order(self, order_id: str, symbol: str):
         cancel_order_request_body = {'symbol': symbol, 'orderId': order_id}
         cancel_order_response = self.request_delete('/orders', **cancel_order_request_body);
-        return cancel_order_response['errors'] is None
+        return self.parse_order_info_response(cancel_order_response, '', '')
 
     # {'body': {'eventType': 'REJECTED', 'event': {'cause': 'Order has been executed'}}, 'errors': None, 'debugInfo': None}
 
@@ -160,7 +209,6 @@ class DexilonClientImpl(DexilonClient):
             r = requests.delete(self.API_URL + uri, headers=self.headers, params=kwargs)
             return self.handle_response(r)
         return response
-
 
     def get_error_message(self, response) -> str:
         if 'errors' in response and response['errors'] is not None and len(response['errors']) > 0:
