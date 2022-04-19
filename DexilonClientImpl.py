@@ -173,7 +173,7 @@ class DexilonClientImpl(DexilonClient):
         margin_response = self.request_get('/margin', None)
 
         return MarginData(margin_response['body']['margin'], margin_response['body']['upl'],
-                          margin_response['body']['equity'], margin_response['body']['lockedBalanceForOpenOrders'])
+                          margin_response['body']['equity'], margin_response['body']['lockedBalanceForOpenOrders'], margin_response['body']['locked'])
 
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
