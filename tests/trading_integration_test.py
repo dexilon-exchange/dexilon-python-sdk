@@ -8,6 +8,9 @@ class TestTradingIntegration:
     TEST_METAMASK_ADDRESS = '0x201d980aeD5C04a7e75860cFE29CeD9b5da05A08'
     TEST_PRIVATE_KEY = '87d25c8ade8c4bb32be098bb35cd594fd1c0511c4423bf36f006f4ecd27f017c'
 
+    # TEST_METAMASK_ADDRESS = '0x92f4888b49442244bD99A85AF84cccc49907f3f7'
+    # TEST_PRIVATE_KEY = '7bf5ae9f4d080107e105212f40cdc3d897d1101e69fd8f0a36e5bb648055ff52'
+
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
 

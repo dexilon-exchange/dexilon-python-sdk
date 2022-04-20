@@ -148,8 +148,6 @@ class DexilonClientImpl(DexilonClient):
         cancel_order_response = self.request_delete('/orders', **cancel_order_request_body);
         return self.parse_order_info_response(cancel_order_response, '', '')
 
-    # {'body': {'eventType': 'REJECTED', 'event': {'cause': 'Order has been executed'}}, 'errors': None, 'debugInfo': None}
-
     def get_all_symbols(self) -> List[AvailableSymbol]:
         all_symbols_response = self.request_get('/symbols', None)
         available_symbols = []
@@ -171,9 +169,13 @@ class DexilonClientImpl(DexilonClient):
     def get_margin(self) -> MarginData:
         self.check_authentication()
         margin_response = self.request_get('/margin', None)
+        margin_response_body = margin_response['body']
 
-        return MarginData(margin_response['body']['margin'], margin_response['body']['upl'],
-                          margin_response['body']['equity'], margin_response['body']['lockedBalanceForOpenOrders'], margin_response['body']['locked'])
+        return MarginData(self.parse_value_or_return_None(margin_response_body, 'margin'),
+                          self.parse_value_or_return_None(margin_response_body, 'upl'),
+                          self.parse_value_or_return_None(margin_response_body, 'equity'),
+                          self.parse_value_or_return_None(margin_response_body, 'locked')
+                          )
 
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
