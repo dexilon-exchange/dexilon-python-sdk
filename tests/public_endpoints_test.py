@@ -1,3 +1,5 @@
+import time
+
 from DexilonClientImpl import DexilonClientImpl
 
 
@@ -9,7 +11,10 @@ class TestGetAllSymbols:
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
 
     def test_get_all_symbols(self):
+        start = time.time()
         all_symbols = self.test_instance.get_all_symbols()
+        end = time.time()
+        print('test_get_all_symbols Execution time: ', (end - start))
         assert len(all_symbols) > 0
 
     def test_should_get_order_book(self):
