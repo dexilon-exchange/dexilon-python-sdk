@@ -31,3 +31,11 @@ class DexilonAuthException(Exception) :
 
     def __str__(self):
         return 'DexilonAuthException: %s' % self.message
+
+class DexilonEventException(Exception):
+
+    code = 2
+    name = 'EventError'
+
+    def __init__(self, message: str) -> None:
+        self.message = message

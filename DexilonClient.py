@@ -1,10 +1,10 @@
 from typing import List
 
-from AvailableSymbol import AvailableSymbol
 from FullOrderInfo import FullOrderInfo
 from MarginData import MarginData
 from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
+from responses import AvailableSymbol
 
 
 class DexilonClient():
