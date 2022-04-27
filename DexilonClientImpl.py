@@ -37,7 +37,7 @@ class DexilonClientImpl(DexilonClient):
         :type api_secret: str.
         """
 
-        self.METAMASK_ADDRESS = metamask_address
+        self.METAMASK_ADDRESS = metamask_address.lower()
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
 
