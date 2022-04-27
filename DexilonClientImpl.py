@@ -12,15 +12,13 @@ from DexilonClient import DexilonClient
 from ErrorInfo import ErrorInfo
 from FullOrderInfo import FullOrderInfo
 from MarginData import MarginData
-from OrderBook import OrderBook
-from OrderBookInfo import OrderBookInfo
 from OrderErrorInfo import OrderErrorInfo
 from OrderInfo import OrderInfo
 from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException, DexilonEventException
 from typing import List
 
-from responses import AvailableSymbol
+from responses import AvailableSymbol, OrderBookInfo, OrderBook
 
 
 class DexilonClientImpl(DexilonClient):
@@ -41,14 +39,9 @@ class DexilonClientImpl(DexilonClient):
         :type api_secret: str.
         """
 
-        self.METAMASK_ADDRESS = metamask_address
-        self.API_SECRET = api_secret
+        self.METAMASK_ADDRESS = metamask_address.lower()
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
 
-        self.metamask_address: str = metamask_address
-        self.private_key: PrivateKey = keys.PrivateKey(
-            bytes.fromhex(api_secret)
-        )
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
 
     def change_api_url(self, api_url):
@@ -159,14 +152,6 @@ class DexilonClientImpl(DexilonClient):
         return self.parse_order_info_response(cancel_order_response, '', '')
 
     def get_all_symbols(self) -> List[AvailableSymbol]:
-        # all_symbols_response = self.request_get('/symbols', None)
-        # available_symbols = []
-        # all_symbols_list = all_symbols_response['body']
-        # for symbol in all_symbols_list:
-        #     available_symbols.append(
-        #         AvailableSymbol(symbol['symbol'], symbol['isFavorite'], symbol['lastPrice'], symbol['volume'],
-        #                         symbol['price24Percentage']))
-        # return available_symbols
         return self._request('GET', '/symbols', model=List[AvailableSymbol])
 
     def _request(self, method: str, path: str, params: dict = None, data: dict = None, model: BaseModel = None) -> BaseModel:
@@ -183,11 +168,9 @@ class DexilonClientImpl(DexilonClient):
 
     def get_orderbook(self, symbol: str) -> OrderBookInfo:
         orderbook_request = {'symbol': symbol}
-        orderbooks_response = self.request_get('/orders/book', orderbook_request)
-        all_orderbook_values = orderbooks_response['body']
-
-        return OrderBookInfo(self.parse_order_books('ask', all_orderbook_values),
-                             self.parse_order_books('bid', all_orderbook_values), datetime.now())
+        orderbook_info = self._request('GET', '/orders/book', params=orderbook_request, model=OrderBookInfo)
+        orderbook_info.timestamp = datetime.now()
+        return orderbook_info
 
     def get_margin(self) -> MarginData:
         self.check_authentication()
@@ -240,23 +223,14 @@ class DexilonClientImpl(DexilonClient):
             return response['errors']
         return ''
 
-    def parse_order_books(self, type: str, data_holder) -> List[OrderBook]:
-        data_entries = data_holder[type]
-        result = []
-        for data_entry in data_entries:
-            result.append(OrderBook(data_entry['price'], data_entry['size'], data_entry['sum']))
-
-        return result
-
     def check_authentication(self):
         if len(self.JWT_KEY) == 0:
             self.authenticate()
 
     def authenticate(self):
         payload = {'metamaskAddress': self.METAMASK_ADDRESS}
-        r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=self.headers)
-        nonce_response = self._handle_response(r)
-        nonce = nonce_response['body']['nonce']
+        nonce_response = self._request('POST', '/auth/startAuth', model=dict, data=payload)
+        nonce = nonce_response['nonce']
         if len(nonce) == 0:
             print('ERROR: nonce was not received for Authentication request')
         print(nonce)
@@ -269,17 +243,17 @@ class DexilonClientImpl(DexilonClient):
 
         print(signature_payload)
 
-        auth_response = requests.post(self.API_URL + '/auth/finishAuth', json=signature_payload, headers=self.headers)
+        # auth_response = requests.post(self.API_URL + '/auth/finishAuth', json=signature_payload, headers=self.headers)
+        auth_response = self._request('POST', '/auth/finishAuth', model=dict, data=signature_payload)
 
-        auth_info = self._handle_response(auth_response)
-
-        jwk_token = auth_info['body']['jwt']
+        jwk_token = auth_response['jwt']
         if jwk_token is None or len(jwk_token) == 0:
             raise DexilonAuthException('Was not able to obtain JWT token for authentication')
 
-        print(auth_info)
-        self.headers['Authorization'] = 'Bearer ' + jwk_token
-        self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
+        print(jwk_token)
+        self.client.update_headers({'Authorization':'Bearer ' + jwk_token, 'MetamaskAddress': self.METAMASK_ADDRESS})
+        # self.headers['Authorization'] = 'Bearer ' + jwk_token
+        # self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
 
         self.JWT_KEY = jwk_token
 

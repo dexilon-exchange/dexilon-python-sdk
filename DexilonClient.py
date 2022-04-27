@@ -2,9 +2,8 @@ from typing import List
 
 from FullOrderInfo import FullOrderInfo
 from MarginData import MarginData
-from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
-from responses import AvailableSymbol
+from responses import AvailableSymbol, OrderBookInfo
 
 
 class DexilonClient():

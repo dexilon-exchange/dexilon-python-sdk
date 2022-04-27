@@ -1,4 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
+import time
 
 
 class TestAuthentication:
@@ -9,14 +10,20 @@ class TestAuthentication:
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
 
     def test_should_authenticate(self):
+        start = time.time()
         self.test_instance.authenticate()
+        end = time.time()
+        print('test_should_authenticate Execution time: ', (end - start))
         assert self.test_instance.JWT_KEY != ''
 
     def test_should_reauthenticate_on_get_margin_request_if_token_expired(self):
         self.test_instance.authenticate()
         self.test_instance.JWT_KEY = 'CHANGED_GWT_KEY'
-        self.test_instance.headers['Authorization'] = 'Bearer + ' + self.test_instance.JWT_KEY
+        self.test_instance.client.update_headers({'Authorization': 'Bearer + ' + self.test_instance.JWT_KEY})
+        start = time.time()
         margin = self.test_instance.get_margin()
+        end = time.time()
+        print('test_should_reauthenticate_on_get_margin_request_if_token_expired Execution time: ', (end - start))
         assert margin is not None
 
     def test_should_reauthenticate_on_post_market_order(self):

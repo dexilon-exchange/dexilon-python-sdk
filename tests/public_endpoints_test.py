@@ -18,5 +18,8 @@ class TestGetAllSymbols:
         assert len(all_symbols) > 0
 
     def test_should_get_order_book(self):
+        start = time.time()
         order_book_data = self.test_instance.get_orderbook('btc_usdc')
+        end = time.time()
+        print('test_should_get_order_book Execution time: ', (end - start))
         assert order_book_data is not None
