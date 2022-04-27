@@ -181,8 +181,8 @@ class DexilonClientImpl(DexilonClient):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
         response = self.handle_response(r)
         error_message = self.get_error_message(response)
-        if len(error_message) > 0 and 'Unable to validate JWT token' in error_message:
-            print('JWT Token expired. Need to reauthenticate')
+        if len(error_message) > 0 and 'message' in error_message and 'Unable to validate JWT token' in error_message['message']:
+            print('Unable to validate JWT token')
             self.authenticate()
             r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
             return self.handle_response(r)
@@ -193,7 +193,7 @@ class DexilonClientImpl(DexilonClient):
         r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
         response = self.handle_response(r)
         error_message = self.get_error_message(response)
-        if len(error_message) > 0 and 'Unable to validate JWT token' in error_message['message']:
+        if len(error_message) > 0 and 'message' in error_message and 'Unable to validate JWT token' in error_message['message']:
             print('JWT Token expired. Need to reauthenticate')
             self.authenticate()
             r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
@@ -230,7 +230,7 @@ class DexilonClientImpl(DexilonClient):
             self.authenticate()
 
     def authenticate(self):
-        payload = {'metamaskAddress': self.METAMASK_ADDRESS}
+        payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower()}
         r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=self.headers)
         nonce_response = self._handle_response(r)
         nonce = nonce_response['body']['nonce']
@@ -242,7 +242,7 @@ class DexilonClientImpl(DexilonClient):
             encode_defunct(str.encode(nonce)), private_key=self.pk1
         ).signature
 
-        signature_payload = {'metamaskAddress': self.METAMASK_ADDRESS, 'signedNonce': signature.hex()}
+        signature_payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower(), 'signedNonce': signature.hex()}
 
         print(signature_payload)
 
@@ -250,11 +250,11 @@ class DexilonClientImpl(DexilonClient):
 
         auth_info = self._handle_response(auth_response)
 
-        jwk_token = auth_info['body']['jwt']
+        jwk_token = auth_info['body']['accessToken']
         if jwk_token is None or len(jwk_token) == 0:
             raise DexilonAuthException('Was not able to obtain JWT token for authentication')
 
-        print(auth_info)
+        print(jwk_token)
         self.headers['Authorization'] = 'Bearer ' + jwk_token
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
 
