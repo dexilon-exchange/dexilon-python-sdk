@@ -1,8 +1,8 @@
 from typing import List
 
+from AccountInfo import AccountInfo
 from AvailableSymbol import AvailableSymbol
 from FullOrderInfo import FullOrderInfo
-from MarginData import MarginData
 from OrderBookInfo import OrderBookInfo
 from OrderInfo import OrderInfo
 
@@ -60,12 +60,11 @@ class DexilonClient():
         """
         pass
 
-    def get_margin(self) -> MarginData:
+    def get_account_info(self) -> AccountInfo:
         """
-        :return:
-        MarginData
+        Get account balance info
+        :return: AccountInfo
         """
-        pass
 
 
     def cancel_all_orders(self) -> bool:

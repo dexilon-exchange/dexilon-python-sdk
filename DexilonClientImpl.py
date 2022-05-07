@@ -6,15 +6,17 @@ from web3.auto import w3
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 
+from AccountInfo import AccountInfo
 from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
 from ErrorInfo import ErrorInfo
 from FullOrderInfo import FullOrderInfo
-from MarginData import MarginData
+from OrderBalanceInfo import OrderBalanceInfo
 from OrderBook import OrderBook
 from OrderBookInfo import OrderBookInfo
 from OrderErrorInfo import OrderErrorInfo
 from OrderInfo import OrderInfo
+from PositionInfo import PositionInfo
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from typing import List
 
@@ -166,16 +168,25 @@ class DexilonClientImpl(DexilonClient):
         return OrderBookInfo(self.parse_order_books('ask', all_orderbook_values),
                              self.parse_order_books('bid', all_orderbook_values), datetime.now())
 
-    def get_margin(self) -> MarginData:
+    def get_account_info(self) -> AccountInfo:
         self.check_authentication()
-        margin_response = self.request_get('/margin', None)
-        margin_response_body = margin_response['body']
+        account_info_response = self.request_get('/accounts', None)
+        account_info_body = account_info_response['body']
+        margin = account_info_body['margin']
+        locked = account_info_body['locked']
+        upl = account_info_body['upl']
+        equity = account_info_body['equity']
+        positions_list = account_info_body['positions']
+        orders_list = account_info_body['orders']
+        orders = []
+        positions = []
+        for order_info in orders_list:
+            orders.append(OrderBalanceInfo(order_info['symbol'], order_info['lockedAsk'], order_info['lockedBid']))
+        for position_info in positions_list:
+            positions.append(PositionInfo(position_info['symbol'], position_info['amount'], position_info['basePrice'], position_info['liqPrice'],
+                                          position_info['pl'], position_info['plPercentage'], position_info['leverage']))
 
-        return MarginData(self.parse_value_or_return_None(margin_response_body, 'margin'),
-                          self.parse_value_or_return_None(margin_response_body, 'upl'),
-                          self.parse_value_or_return_None(margin_response_body, 'equity'),
-                          self.parse_value_or_return_None(margin_response_body, 'locked')
-                          )
+        return AccountInfo(margin, locked, upl, equity, positions, orders)
 
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)

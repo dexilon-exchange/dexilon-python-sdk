@@ -7,17 +7,18 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
+        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
 
     def test_should_authenticate(self):
         self.test_instance.authenticate()
         assert self.test_instance.JWT_KEY != ''
 
-    def test_should_reauthenticate_on_get_margin_request_if_token_expired(self):
+    def test_should_reauthenticate_on_get_accounts_request_if_token_expired(self):
         self.test_instance.authenticate()
         self.test_instance.JWT_KEY = 'CHANGED_GWT_KEY'
         self.test_instance.headers['Authorization'] = 'Bearer + ' + self.test_instance.JWT_KEY
-        margin = self.test_instance.get_margin()
-        assert margin is not None
+        account_info = self.test_instance.get_account_info()
+        assert account_info is not None
 
     def test_should_reauthenticate_on_post_market_order(self):
         self.test_instance.authenticate()
