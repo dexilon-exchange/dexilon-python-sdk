@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 import requests as requests
 
@@ -40,6 +41,7 @@ class DexilonClientImpl(DexilonClient):
         """
 
         self.METAMASK_ADDRESS = metamask_address.lower()
+        self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
 
@@ -55,18 +57,13 @@ class DexilonClientImpl(DexilonClient):
         self.API_URL = api_url
 
     def get_open_orders(self) -> List[OrderInfo]:
-        orders_response = {}
+        orders_response = []
         self.check_authentication()
         open_orders_response = self.request_get('/orders/open', None)
         open_orders_by_symbol = open_orders_response['body']
-        for orders_by_symbol in open_orders_by_symbol:
-            symbol = orders_by_symbol['symbol']
-            order_list = orders_by_symbol['orders']
-            orders_response[symbol] = []
-            for order in order_list:
-                order_info = OrderInfo(order['id'], order['type'], order['amount'], order['price'], order['side'],
-                                       order['placedAt'])
-                orders_response[symbol].append(order_info)
+        for order in open_orders_by_symbol['content']:
+            order_info = OrderInfo(order['id'], order['symbol'], order['type'], order['amount'], order['price'], order['side'], order['filled'], order['placedAt'])
+            orders_response.append(order_info)
         return orders_response
 
     def get_order_info(self, order_id: str, symbol: str) -> FullOrderInfo:
@@ -99,14 +96,25 @@ class DexilonClientImpl(DexilonClient):
 
     def market_order(self, client_order_id: str, symbol: str, side: str, size: float):
         self.check_authentication()
-        json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size}
+        nonce = self.compose_nonce([client_order_id, symbol, side, size])
+        signed_nonce = self.sign(nonce)
+        json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size, 'nonce': nonce, 'signedNonce': signed_nonce}
         market_order_response = self.request_post('/orders/market', **json_request_body)
         return self.parse_order_info_response(market_order_response, 'MARKET', client_order_id)
 
+    # def compose_nonce(self, client_order_id, symbol, side, size):
+    def compose_nonce(self, kwargs: []):
+        current_milliseconds = round(time.time() * 1000)
+        nonce_value = ''
+        for param in kwargs:
+            nonce_value = nonce_value + str(param) + ':'
+        return nonce_value + str(current_milliseconds)
+        # return client_order_id + ':' + symbol + ':' + side + ':' + str(size) + ':' + str(current_milliseconds)
+
     def parse_order_info_response(self, order_info_response, order_type, client_order_id):
-        if 'errors' in order_info_response and order_info_response['errors'] is not None:
-            errors = order_info_response['errors']
-            return ErrorInfo(self.parse_value_or_return_None(errors, 'code'), self.parse_value_or_return_None(errors, 'message'))
+        if 'errorBody' in order_info_response and order_info_response['errorBody'] is not None:
+            errors = order_info_response['errorBody']
+            return ErrorInfo(self.parse_value_or_return_None(errors, 'code'), self.parse_value_or_return_None(errors, 'details')[0])
         if 'body' in order_info_response:
             if 'eventType' in order_info_response['body']:
                 eventType = order_info_response['body']['eventType']
@@ -136,8 +144,10 @@ class DexilonClientImpl(DexilonClient):
 
     def limit_order(self, client_order_id: str, symbol: str, side: str, price: float, size: float):
         self.check_authentication()
+        nonce = self.compose_nonce([client_order_id, symbol, side, size, price])
+        signed_nonce = self.sign(nonce)
         json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size,
-                             'price': price}
+                             'price': price, 'nonce': nonce, 'signedNonce': signed_nonce}
         limit_order_response = self.request_post('/orders/limit', **json_request_body)
         return self.parse_order_info_response(limit_order_response, 'LIMIT', client_order_id)
 
@@ -199,8 +209,11 @@ class DexilonClientImpl(DexilonClient):
             return self.handle_response(r)
         return response
 
+    def request_post_signed(self, uri, **kwargs):
+        r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
+        return self.handle_response(r)
+
     def request_post(self, uri, **kwargs):
-        self.check_authentication()
         r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
         response = self.handle_response(r)
         error_message = self.get_error_message(response)
@@ -240,8 +253,14 @@ class DexilonClientImpl(DexilonClient):
         if len(self.JWT_KEY) == 0:
             self.authenticate()
 
+    def sign(self, nonce: str) -> str:
+        return w3.eth.account.sign_message(
+            encode_defunct(str.encode(nonce)), private_key=self.pk1
+        ).signature.hex()
+
     def authenticate(self):
         payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower()}
+        self.headers.pop("MetamaskAddress")
         r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=self.headers)
         nonce_response = self._handle_response(r)
         nonce = nonce_response['body']['nonce']
@@ -249,11 +268,7 @@ class DexilonClientImpl(DexilonClient):
             print('ERROR: nonce was not received for Authentication request')
         print(nonce)
 
-        signature = w3.eth.account.sign_message(
-            encode_defunct(str.encode(nonce)), private_key=self.pk1
-        ).signature
-
-        signature_payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower(), 'signedNonce': signature.hex()}
+        signature_payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower(), 'signedNonce': self.sign(nonce)}
 
         print(signature_payload)
 
@@ -267,8 +282,7 @@ class DexilonClientImpl(DexilonClient):
 
         print(jwk_token)
         self.headers['Authorization'] = 'Bearer ' + jwk_token
-        self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
-
+        self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS.lower()
         self.JWT_KEY = jwk_token
 
     def _handle_response(self, response):

@@ -13,10 +13,10 @@ class TestTradingIntegration:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://dex-qa-api.cronrate.com/api/v1')
 
     def test_create_market_order(self):
-        full_order_info = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 0.10)
+        full_order_info = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'SELL', 0.20)
         assert isinstance(full_order_info, FullOrderInfo) and full_order_info.order_id is not None
 
     def test_create_market_order_with_rejected_state(self):
@@ -24,7 +24,7 @@ class TestTradingIntegration:
         assert isinstance(order_submit_result, OrderErrorInfo)
 
     def test_create_limit_order(self):
-        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 3200.0, 0.1)
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1650.0, 0.2)
         assert isinstance(full_order_info, FullOrderInfo) and full_order_info.order_id is not None
 
     def test_create_limit_order_with_rejected_state(self):
@@ -50,8 +50,12 @@ class TestTradingIntegration:
         assert account_info_result is not None
 
     def test_should_get_all_open_orders(self):
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
+
         open_orders = self.test_instance.get_open_orders()
         assert len(open_orders) > 0
+
+        self.test_instance.cancel_order(full_order_info.order_id, full_order_info.symbol)
 
     def test_should_get_order_info(self):
         full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
@@ -66,9 +70,11 @@ class TestTradingIntegration:
         assert isinstance(cancel_result, OrderErrorInfo)
 
     def test_should_parse_response_for_illegal_char_in_cancel_request(self):
-        cancel_result = self.test_instance.cancel_order('RANDOM_ID_1', 'eth_usdc')
-        assert isinstance(cancel_result, ErrorInfo)
+        cancel_result = self.test_instance.cancel_order('RANDOM-ID-1', 'eth_usdc')
+        assert isinstance(cancel_result, OrderErrorInfo)
 
-    def test_should_process_error_for_market_order_submit(self):
-        order_id = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 0.10)
-        assert len(order_id) > 0
+    def test_should_process_error_for_limit_order_submit(self):
+        order_submit_result = self.test_instance.limit_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 1600.00, 0.10)
+        assert isinstance(order_submit_result, OrderErrorInfo)
+        if isinstance(order_submit_result, OrderErrorInfo):
+            assert 'REJECTED' in order_submit_result.state
