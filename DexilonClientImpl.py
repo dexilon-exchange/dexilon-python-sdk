@@ -153,7 +153,7 @@ class DexilonClientImpl(DexilonClient):
 
     def cancel_all_orders(self) -> bool:
         cancel_all_orders_response = self.request_delete('/orders/batch')
-        return cancel_all_orders_response['errors'] is None
+        return cancel_all_orders_response['errorBody'] is None
 
     def cancel_order(self, order_id: str, symbol: str):
         cancel_order_request_body = {'symbol': symbol, 'orderId': order_id}
