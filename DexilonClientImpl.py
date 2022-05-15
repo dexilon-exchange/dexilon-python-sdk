@@ -10,7 +10,7 @@ from eth_keys import keys
 from AccountInfo import AccountInfo
 from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
-from ErrorInfo import ErrorInfo
+from ErrorBody import ErrorBody
 from FullOrderInfo import FullOrderInfo
 from OrderBalanceInfo import OrderBalanceInfo
 from OrderBook import OrderBook
@@ -112,9 +112,9 @@ class DexilonClientImpl(DexilonClient):
         # return client_order_id + ':' + symbol + ':' + side + ':' + str(size) + ':' + str(current_milliseconds)
 
     def parse_order_info_response(self, order_info_response, order_type, client_order_id):
-        if 'errorBody' in order_info_response and order_info_response['errorBody'] is not None:
-            errors = order_info_response['errorBody']
-            return ErrorInfo(self.parse_value_or_return_None(errors, 'code'), self.parse_value_or_return_None(errors, 'details')[0])
+        error_body = self.get_error_body(order_info_response)
+        if error_body is not None:
+            return OrderErrorInfo(client_order_id, '', error_body.name, error_body.details)
         if 'body' in order_info_response:
             if 'eventType' in order_info_response['body']:
                 eventType = order_info_response['body']['eventType']
@@ -201,9 +201,8 @@ class DexilonClientImpl(DexilonClient):
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
         response = self.handle_response(r)
-        error_message = self.get_error_message(response)
-        if len(error_message) > 0 and 'message' in error_message and 'Unable to validate JWT token' in error_message['message']:
-            print('Unable to validate JWT token')
+        if r.status_code == 401:
+            print('The user is not authorized to perform the request. Reauthorizing...')
             self.authenticate()
             r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
             return self.handle_response(r)
@@ -216,9 +215,8 @@ class DexilonClientImpl(DexilonClient):
     def request_post(self, uri, **kwargs):
         r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
         response = self.handle_response(r)
-        error_message = self.get_error_message(response)
-        if len(error_message) > 0 and 'message' in error_message and 'Unable to validate JWT token' in error_message['message']:
-            print('JWT Token expired. Need to reauthenticate')
+        if r.status_code == 401:
+            print('The user is not authorized to perform the request. Reauthorizing...')
             self.authenticate()
             r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
             return self.handle_response(r)
@@ -228,18 +226,18 @@ class DexilonClientImpl(DexilonClient):
         self.check_authentication()
         r = requests.delete(self.API_URL + uri, headers=self.headers, params=kwargs)
         response = self.handle_response(r)
-        error_message = self.get_error_message(response)
-        if len(error_message) > 0 and 'Unable to validate JWT token' in error_message['message']:
-            print('JWT Token expired. Need to reauthenticate')
+        if r.status_code == 401:
+            print('The user is not authorized to perform the request. Reauthorizing...')
             self.authenticate()
             r = requests.delete(self.API_URL + uri, headers=self.headers, params=kwargs)
             return self.handle_response(r)
         return response
 
-    def get_error_message(self, response) -> str:
-        if 'errors' in response and response['errors'] is not None and len(response['errors']) > 0:
-            return response['errors']
-        return ''
+    def get_error_body(self, response) -> ErrorBody:
+        if 'errorBody' in response and response['errorBody'] is not None:
+            error_body = response['errorBody']
+            return ErrorBody(error_body['code'], error_body['name'], ';'.join(error_body['details']))
+        return None
 
     def parse_order_books(self, type: str, data_holder) -> List[OrderBook]:
         data_entries = data_holder[type]

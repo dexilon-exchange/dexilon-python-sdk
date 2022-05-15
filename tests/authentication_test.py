@@ -1,4 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
+from FullOrderInfo import FullOrderInfo
 from OrderErrorInfo import OrderErrorInfo
 
 
@@ -8,7 +9,7 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-qa-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
 
     def test_should_authenticate(self):
         self.test_instance.authenticate()
@@ -29,7 +30,7 @@ class TestAuthentication:
         if isinstance(order_submit_response, OrderErrorInfo):
             assert True
         else:
-            assert len(order_submit_response) > 0
+            assert isinstance(order_submit_response, FullOrderInfo)
 
     def test_should_reauthenticate_on_delete_order(self):
         self.test_instance.authenticate()

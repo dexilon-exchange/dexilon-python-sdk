@@ -1,5 +1,4 @@
 from DexilonClientImpl import DexilonClientImpl
-from ErrorInfo import ErrorInfo
 from FullOrderInfo import FullOrderInfo
 from OrderErrorInfo import OrderErrorInfo
 
@@ -13,7 +12,7 @@ class TestTradingIntegration:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-qa-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
 
     def test_create_market_order(self):
         full_order_info = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'SELL', 0.20)
@@ -49,7 +48,7 @@ class TestTradingIntegration:
         account_info_result = self.test_instance.get_account_info()
         assert account_info_result is not None
 
-    def test_should_get_all_open_orders(self):
+    def test_should_get_all_open_orders(self): #
         full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
 
         open_orders = self.test_instance.get_open_orders()
@@ -57,7 +56,7 @@ class TestTradingIntegration:
 
         self.test_instance.cancel_order(full_order_info.order_id, full_order_info.symbol)
 
-    def test_should_get_order_info(self):
+    def test_should_get_order_info(self): #
         full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
 
         order_info = self.test_instance.get_order_info(full_order_info.order_id, full_order_info.symbol)

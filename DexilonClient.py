@@ -39,6 +39,8 @@ class DexilonClient():
         :param size: amount of the order asset
         :type size: float
         :return: Dexilon generated order id
+
+        :throws: OrderErrorInfo in case if there is any issues with submitted order
         """
         pass
 
