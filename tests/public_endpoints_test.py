@@ -1,4 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
+from responses import AvailableSymbolsResponse
 
 
 class TestGetAllSymbols:
@@ -11,8 +12,10 @@ class TestGetAllSymbols:
 
     def test_get_all_symbols(self):
         all_symbols = self.test_instance.get_all_symbols()
-        assert len(all_symbols) > 0
+        assert isinstance(all_symbols, AvailableSymbolsResponse)
+        assert all_symbols.errorBody is None
+        assert len(all_symbols.body) > 0
 
     def test_should_get_order_book(self):
-        order_book_data = self.test_instance.get_orderbook('btc_usdc')
+        order_book_data = self.test_instance.get_orderbook('sol_usdc')
         assert order_book_data is not None

@@ -2,24 +2,26 @@ from datetime import datetime
 import time
 
 import requests as requests
+from pydantic import BaseModel
+from pydantic import BaseModel, parse_obj_as
 
 from web3.auto import w3
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 
 from AccountInfo import AccountInfo
-from AvailableSymbol import AvailableSymbol
 from DexilonClient import DexilonClient
 from ErrorBody import ErrorBody
 from FullOrderInfo import FullOrderInfo
 from OrderBalanceInfo import OrderBalanceInfo
-from OrderBook import OrderBook
-from OrderBookInfo import OrderBookInfo
 from OrderErrorInfo import OrderErrorInfo
 from OrderInfo import OrderInfo
 from PositionInfo import PositionInfo
+from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from typing import List
+
+from responses import AvailableSymbol, OrderBookInfo, OrderBook, NonceResponse, AvailableSymbolsResponse
 
 
 class DexilonClientImpl(DexilonClient):
@@ -44,6 +46,7 @@ class DexilonClientImpl(DexilonClient):
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
+        self.client: SessionClient = SessionClient(self.API_URL, self.headers)
 
     def change_api_url(self, api_url):
         """
@@ -55,6 +58,7 @@ class DexilonClientImpl(DexilonClient):
         """
 
         self.API_URL = api_url
+        self.client.base_url = api_url
 
     def get_open_orders(self) -> List[OrderInfo]:
         orders_response = []
@@ -161,22 +165,11 @@ class DexilonClientImpl(DexilonClient):
         return self.parse_order_info_response(cancel_order_response, '', '')
 
     def get_all_symbols(self) -> List[AvailableSymbol]:
-        all_symbols_response = self.request_get('/symbols', None)
-        available_symbols = []
-        all_symbols_list = all_symbols_response['body']
-        for symbol in all_symbols_list:
-            available_symbols.append(
-                AvailableSymbol(symbol['symbol'], symbol['isFavorite'], symbol['lastPrice'], symbol['volume'],
-                                symbol['price24Percentage']))
-        return available_symbols
+        return self._request('GET', '/symbols', model=AvailableSymbolsResponse)
 
     def get_orderbook(self, symbol: str) -> OrderBookInfo:
         orderbook_request = {'symbol': symbol}
-        orderbooks_response = self.request_get('/orders/book', orderbook_request)
-        all_orderbook_values = orderbooks_response['body']
-
-        return OrderBookInfo(self.parse_order_books('ask', all_orderbook_values),
-                             self.parse_order_books('bid', all_orderbook_values), datetime.now())
+        return self._request('GET', '/orders/book', params=orderbook_request, model=OrderBookInfo)
 
     def get_account_info(self) -> AccountInfo:
         self.check_authentication()
@@ -197,6 +190,35 @@ class DexilonClientImpl(DexilonClient):
                                           position_info['pl'], position_info['plPercentage'], position_info['leverage']))
 
         return AccountInfo(margin, locked, upl, equity, positions, orders)
+
+    def _request(self, method: str, path: str, params: dict = None, data: dict = None,
+                 model: BaseModel = None) -> BaseModel:
+
+        return self._handle_response_new(
+            response=self.client.request(
+                method=method,
+                path=path,
+                params=params,
+                data=data
+            ),
+            model=model
+        )
+
+    def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
+        data: dict = response['body']
+        if 'eventType' in data or 'event' in data:
+            self._handle_event(
+                event_type=data.get('eventType'),
+                event_data=data.get('event')
+            )
+        elif model:
+            return parse_obj_as(model, response)
+        else:
+            return data
+
+    def _handle_event(self, event_type: str, event_data: dict):
+        if event_type == 'REJECTED':
+            raise DexilonEventException(event_data['cause'])
 
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
@@ -256,9 +278,21 @@ class DexilonClientImpl(DexilonClient):
             encode_defunct(str.encode(nonce)), private_key=self.pk1
         ).signature.hex()
 
+    # def get_orderbook(self, symbol: str) -> OrderBookInfo:
+    #     orderbook_request = {'symbol': symbol}
+    #     return self._request('GET', '/orders/book', params=orderbook_request, model=OrderBookInfo)
+
     def authenticate(self):
         payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower()}
-        self.headers.pop("MetamaskAddress")
+        self.client.delete_header("MetamaskAddress")
+        nonce = self._request('POST', '/auth/startAuth', data=payload, model=NonceResponse)
+        if len(nonce) == 0:
+            print('ERROR: nonce was not received for Authentication request')
+        print(nonce)
+
+        signature_payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower(), 'signedNonce': self.sign(nonce)}
+
+        # self.headers.pop("MetamaskAddress")
         r = requests.post(self.API_URL + '/auth/startAuth', json=payload, headers=self.headers)
         nonce_response = self._handle_response(r)
         nonce = nonce_response['body']['nonce']
