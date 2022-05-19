@@ -1,5 +1,3 @@
-import OrderInfo
-
 
 class OrdersBySymbol:
 

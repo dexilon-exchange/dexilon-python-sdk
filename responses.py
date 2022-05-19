@@ -3,10 +3,18 @@ from typing import List
 from pydantic import BaseModel, Field
 from pydantic.main import Optional
 
+class ErrorBody(BaseModel):
+    code: int
+    name: str
+    details: List[str]
+
+class DebugInfo(BaseModel):
+    correlationId: Optional[str]
+    stackTrace: Optional[str]
 
 class ServiceResponse(BaseModel):
-    errorBody: Optional[str]
-    debugInfo: Optional[str]
+    errorBody: Optional[ErrorBody]
+    debugInfo: Optional[DebugInfo]
 
 
 class AvailableSymbol(BaseModel):
@@ -17,7 +25,7 @@ class AvailableSymbol(BaseModel):
     price24Percentage: Optional[float]
 
 
-class AvailableSymbolsResponse(ServiceResponse):
+class AvailableSymbolsResponse(BaseModel):
     body: List[AvailableSymbol]
 
 
@@ -39,3 +47,49 @@ class NonceResponse(BaseModel):
 class JWTTokenResponse(BaseModel):
     accessToken: str
     refreshToken: str
+
+
+class OrderEvent(BaseModel):
+    orderId: Optional[str]
+    eventType: str
+    event: dict
+
+
+class PositionInfo(BaseModel):
+    symbol: str
+    amount: float
+    basePrice: float
+    liqPrice: float
+    pl: float
+    plPercentage: int
+    leverage: int
+
+
+class OrderBalanceInfo(BaseModel):
+    symbol: str
+    lockedAsk: float
+    lockedBid: float
+
+
+class AccountInfo(BaseModel):
+    margin: float
+    locked: float
+    upl: float
+    equity: float
+    positions: List[PositionInfo]
+    orders: List[OrderBalanceInfo]
+
+
+class OrderInfo(BaseModel):
+    id: str
+    symbol: str
+    type: str
+    amount: float
+    price: float
+    side: str
+    filled: float
+    placedAt: datetime
+
+
+class AllOpenOrders(BaseModel):
+    content: List[OrderInfo]

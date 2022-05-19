@@ -1,11 +1,13 @@
 import requests
 
-from exceptions import DexilonAPIException, DexilonRequestException
+from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 
 
 class SessionClient:
 
     def __init__(self, base_url: str, headers: dict = {}) -> None:
+
+        self.STATUS_CODES_TO_PROCESS = {200, 400, 401}
 
         self.base_url: str = base_url
         self.session: requests.Session = requests.Session()
@@ -33,12 +35,15 @@ class SessionClient:
 
             data = response.json()
 
-            if not str(response.status_code).startswith('2'):
+            if not response.status_code in self.STATUS_CODES_TO_PROCESS:
                 errors = data.get('errors', {})
                 raise DexilonAPIException(
                     code=errors.get('code', [0])[0],
                     message=errors.get('message', [''])[0]
                 )
+
+            if response.status_code == 401:
+                raise DexilonAuthException(data)
 
             return data
 

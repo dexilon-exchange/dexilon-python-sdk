@@ -21,6 +21,7 @@ class TestTradingIntegration:
     def test_create_market_order_with_rejected_state(self):
         order_submit_result = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'BUY', 100.00)
         assert isinstance(order_submit_result, OrderErrorInfo)
+        assert 'NEW_ORDER_REJECTED' in order_submit_result.state
 
     def test_create_limit_order(self):
         full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1650.0, 0.2)
