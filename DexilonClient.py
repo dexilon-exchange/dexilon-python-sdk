@@ -1,7 +1,6 @@
 from typing import List
 
-from FullOrderInfo import FullOrderInfo
-from responses import AvailableSymbol, OrderBookInfo, AccountInfo, OrderInfo
+from responses import AvailableSymbol, OrderBookInfo, AccountInfo, OrderInfo, FullOrderInfo
 
 
 class DexilonClient():

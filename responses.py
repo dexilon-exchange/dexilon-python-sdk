@@ -93,3 +93,18 @@ class OrderInfo(BaseModel):
 
 class AllOpenOrders(BaseModel):
     content: List[OrderInfo]
+
+
+class FullOrderInfo(BaseModel):
+    clientOrderId: Optional[str]
+    symbol: str
+    orderId: str
+    price: float
+    amount: float
+    filledAmount: Optional[float]
+    avgPrice: Optional[float]
+    type: str
+    side: str
+    status: str
+    createdAt: datetime
+    updatedAt: datetime

@@ -1,8 +1,6 @@
-from datetime import datetime
 import time
 
 import requests as requests
-from pydantic import BaseModel
 from pydantic import BaseModel, parse_obj_as
 
 from web3.auto import w3
@@ -11,14 +9,14 @@ from eth_keys import keys
 
 from DexilonClient import DexilonClient
 from ErrorBody import ErrorBody
-from FullOrderInfo import FullOrderInfo
 from OrderErrorInfo import OrderErrorInfo
 from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from typing import List
 
-from responses import AvailableSymbol, OrderBookInfo, OrderBook, NonceResponse, JWTTokenResponse, OrderEvent, \
-    ServiceResponse, DebugInfo, ErrorBody, AccountInfo, OrderBalanceInfo, PositionInfo, OrderInfo, AllOpenOrders
+from responses import AvailableSymbol, OrderBookInfo, NonceResponse, JWTTokenResponse, OrderEvent, \
+    ServiceResponse, ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
+    FullOrderInfo
 
 
 class DexilonClientImpl(DexilonClient):
@@ -68,30 +66,7 @@ class DexilonClientImpl(DexilonClient):
     def get_order_info(self, order_id: str, symbol: str) -> FullOrderInfo:
         self.check_authentication()
         get_order_info_request_params = {'symbol': symbol, 'orderId': order_id}
-        order_info_response = self.request_get('/orders', get_order_info_request_params)
-        if 'body' in order_info_response:
-            order_info_body = order_info_response['body']
-            # TODO add client_order_id
-            return FullOrderInfo('',
-                                 self.parse_value_or_return_None(order_info_body, 'symbol'),
-                                 self.parse_value_or_return_None(order_info_body, 'orderId'),
-                                 self.parse_value_or_return_None(order_info_body, 'price'),
-                                 self.parse_value_or_return_None(order_info_body, 'amount'),
-                                 self.parse_value_or_return_None(order_info_body, 'filledAmount'),
-                                 self.parse_value_or_return_None(order_info_body, 'avgPrice'),
-                                 self.parse_value_or_return_None(order_info_body, 'type'),
-                                 self.parse_value_or_return_None(order_info_body, 'side'),
-                                 self.parse_value_or_return_None(order_info_body, 'status'),
-                                 self.parse_value_or_return_None(order_info_body, 'createdAt'),
-                                 self.parse_value_or_return_None(order_info_body, 'updatedAt')
-                                 )
-
-        return FullOrderInfo('', order_info_response['body']['symbol'], order_info_response['body']['orderId'],
-                             order_info_response['body']['price'], order_info_response['body']['amount'],
-                             order_info_response['body']['filledAmount'], order_info_response['body']['avgPrice'],
-                             order_info_response['body']['type'], order_info_response['body']['side'],
-                             order_info_response['body']['status'], order_info_response['body']['createdAt'], order_info_response['body']['updatedAt']
-                             )
+        return self._request('GET','/orders', params=get_order_info_request_params, model=FullOrderInfo)
 
     def market_order(self, client_order_id: str, symbol: str, side: str, size: float):
         self.check_authentication()
@@ -101,14 +76,12 @@ class DexilonClientImpl(DexilonClient):
         order_response = self._request('POST', '/orders/market', data=json_request_body, model=OrderEvent)
         return self.parse_order_info_response(order_response, 'MARKET', client_order_id)
 
-    # def compose_nonce(self, client_order_id, symbol, side, size):
     def compose_nonce(self, kwargs: []):
         current_milliseconds = round(time.time() * 1000)
         nonce_value = ''
         for param in kwargs:
             nonce_value = nonce_value + str(param) + ':'
         return nonce_value + str(current_milliseconds)
-        # return client_order_id + ':' + symbol + ':' + side + ':' + str(size) + ':' + str(current_milliseconds)
 
     def parse_order_info_response(self, order_info_response, order_type, client_order_id):
         if isinstance(order_info_response, ServiceResponse) :
@@ -119,18 +92,21 @@ class DexilonClientImpl(DexilonClient):
         if order_info_response.eventType is not None:
             if order_info_response.eventType in ['EXECUTED', 'PARTIALLY_EXECUTED', 'APPLIED']:
                 order_data = order_info_response.event
-                return FullOrderInfo(client_order_id, self.parse_value_or_return_None(order_data, 'symbol'),
-                                     self.parse_value_or_return_None(order_data, 'orderId'),
-                                     self.parse_value_or_return_None(order_data, 'price'),
-                                     self.parse_value_or_return_None(order_data, 'size'),
-                                     self.parse_value_or_return_None(order_data, 'filled'),
-                                     self.parse_value_or_return_None(order_data, 'avgPrice'),
-                                     order_type,
-                                     self.parse_value_or_return_None(order_data, 'side'),
-                                     order_info_response.eventType,
-                                     self.parse_value_or_return_None(order_data, 'placedAt'),
-                                     self.parse_value_or_return_None(order_data, 'placedAt')
-                                     )
+                order_dict = {
+                    "clientOrderId": client_order_id,
+                    "symbol": self.parse_value_or_return_None(order_data, 'symbol'),
+                    "orderId": self.parse_value_or_return_None(order_data, 'orderId'),
+                    "price": self.parse_value_or_return_None(order_data, 'price'),
+                    "amount": self.parse_value_or_return_None(order_data, 'size'),
+                    "filledAmount": self.parse_value_or_return_None(order_data, 'filled'),
+                    "avgPrice": self.parse_value_or_return_None(order_data, 'avgPrice'),
+                    "type": order_type,
+                    "side": self.parse_value_or_return_None(order_data, 'side'),
+                    "status": order_info_response.eventType,
+                    "createdAt": self.parse_value_or_return_None(order_data, 'placedAt'),
+                    "updatedAt": self.parse_value_or_return_None(order_data, 'placedAt')
+                }
+                return FullOrderInfo(**order_dict)
             if 'REJECTED' == order_info_response.eventType:
                 order_error_data = order_info_response['event']
                 return OrderErrorInfo(client_order_id, '', order_info_response.eventType, order_error_data['cause'])
@@ -175,35 +151,37 @@ class DexilonClientImpl(DexilonClient):
     def _request(self, method: str, path: str, params: dict = None, data: dict = None,
                  model: BaseModel = None) -> BaseModel:
 
-        return self._handle_response_new(
-            response=self.client.request(
-                method=method,
-                path=path,
-                params=params,
-                data=data
-            ),
-            model=model
-        )
+        try:
+            return self._handle_response_new(
+                response=self.client.request(
+                    method=method,
+                    path=path,
+                    params=params,
+                    data=data
+                ),
+                model=model
+            )
+        except DexilonAuthException:
+            self.authenticate()
+            return self._handle_response_new(
+                response=self.client.request(
+                    method=method,
+                    path=path,
+                    params=params,
+                    data=data
+                ),
+                model=model
+            )
 
     def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
         data: dict = response['body']
         if data is None:
             service_response = parse_obj_as(ServiceResponse, response)
             return service_response
-            # error_event_response = self._handle_error_event(service_response)
-            # if error_event_response is not None:
-            #     return error_event_response
         if model:
             return parse_obj_as(model, data)
         else:
             return data
-
-    # def _handle_error_event(self, event_data: dict):
-    #     if event_data.errorBody is not None:
-    #         event_name = event_data.errorBody.name
-    #         if 'NEW_ORDER_REJECTED' in event_name:
-    #             return OrderErrorInfo('', '', event_name, event_data.errorBody.details)
-    #     return None
 
     def request_get(self, uri, params_request):
         r = requests.get(self.API_URL + uri, headers=self.headers, params=params_request)
@@ -215,10 +193,6 @@ class DexilonClientImpl(DexilonClient):
             return self.handle_response(r)
         return response
 
-    # def request_post_signed(self, uri, **kwargs):
-    #     r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
-    #     return self.handle_response(r)
-
     def request_post(self, uri, **kwargs):
         r = requests.post(self.API_URL + uri, headers=self.headers, json=kwargs)
         response = self.handle_response(r)
@@ -229,30 +203,11 @@ class DexilonClientImpl(DexilonClient):
             return self.handle_response(r)
         return response
 
-    # def request_delete(self, uri, **kwargs):
-    #     self.check_authentication()
-    #     r = requests.delete(self.API_URL + uri, headers=self.headers, params=kwargs)
-    #     response = self.handle_response(r)
-    #     if r.status_code == 401:
-    #         print('The user is not authorized to perform the request. Reauthorizing...')
-    #         self.authenticate()
-    #         r = requests.delete(self.API_URL + uri, headers=self.headers, params=kwargs)
-    #         return self.handle_response(r)
-    #     return response
-
     def get_error_body(self, response) -> ErrorBody:
         if 'errorBody' in response and response['errorBody'] is not None:
             error_body = response['errorBody']
             return ErrorBody(error_body['code'], error_body['name'], ';'.join(error_body['details']))
         return None
-
-    # def parse_order_books(self, type: str, data_holder) -> List[OrderBook]:
-    #     data_entries = data_holder[type]
-    #     result = []
-    #     for data_entry in data_entries:
-    #         result.append(OrderBook(data_entry['price'], data_entry['size'], data_entry['sum']))
-    #
-    #     return result
 
     def check_authentication(self):
         if len(self.JWT_KEY) == 0:
