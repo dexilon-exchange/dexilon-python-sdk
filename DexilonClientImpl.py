@@ -16,7 +16,7 @@ from typing import List
 
 from responses import AvailableSymbol, OrderBookInfo, NonceResponse, JWTTokenResponse, OrderEvent, \
     ServiceResponse, ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    FullOrderInfo
+    FullOrderInfo, LeverageUpdateInfo
 
 
 class DexilonClientImpl(DexilonClient):
@@ -147,6 +147,11 @@ class DexilonClientImpl(DexilonClient):
     def get_account_info(self) -> AccountInfo:
         self.check_authentication()
         return self._request('GET', '/accounts', model=AccountInfo)
+
+    def set_leverage(self, symbol: str, leverage: int) -> LeverageUpdateInfo:
+        self.check_authentication()
+        leverage_request = {'symbol': symbol, 'leverage': leverage}
+        return self._request('PUT', '/accounts/leverage', data=leverage_request, model=LeverageUpdateInfo)
 
     def _request(self, method: str, path: str, params: dict = None, data: dict = None,
                  model: BaseModel = None) -> BaseModel:

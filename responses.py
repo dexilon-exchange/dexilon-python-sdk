@@ -108,3 +108,12 @@ class FullOrderInfo(BaseModel):
     status: str
     createdAt: datetime
     updatedAt: datetime
+
+
+class LeverageEvent(BaseModel):
+    leverage: int
+
+
+class LeverageUpdateInfo(BaseModel):
+    eventType: str
+    event: LeverageEvent

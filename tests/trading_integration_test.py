@@ -1,6 +1,6 @@
 from DexilonClientImpl import DexilonClientImpl
 from OrderErrorInfo import OrderErrorInfo
-from responses import FullOrderInfo
+from responses import FullOrderInfo, LeverageUpdateInfo
 
 
 class TestTradingIntegration:
@@ -80,3 +80,7 @@ class TestTradingIntegration:
         assert isinstance(order_submit_result, OrderErrorInfo)
         if isinstance(order_submit_result, OrderErrorInfo):
             assert 'REJECTED' in order_submit_result.state
+
+    def test_should_set_leverage(self):
+        leverage_update = self.test_instance.set_leverage('eth_usdc', 1)
+        assert isinstance(leverage_update, LeverageUpdateInfo)
