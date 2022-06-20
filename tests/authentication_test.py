@@ -9,7 +9,7 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://dex-dev-api.cronrate.com/api/v1')
 
     def test_should_authenticate(self):
         self.test_instance.authenticate()
