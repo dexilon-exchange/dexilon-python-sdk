@@ -3,18 +3,16 @@ from typing import List
 from pydantic import BaseModel, Field
 from pydantic.main import Optional
 
+
 class ErrorBody(BaseModel):
     code: int
     name: str
     details: List[str]
 
+
 class DebugInfo(BaseModel):
     correlationId: Optional[str]
     stackTrace: Optional[str]
-
-class ServiceResponse(BaseModel):
-    errorBody: Optional[ErrorBody]
-    debugInfo: Optional[DebugInfo]
 
 
 class AvailableSymbol(BaseModel):
@@ -107,7 +105,7 @@ class FullOrderInfo(BaseModel):
     side: str
     status: str
     createdAt: datetime
-    updatedAt: datetime
+    updatedAt: Optional[datetime]
 
 
 class LeverageEvent(BaseModel):
