@@ -1,3 +1,5 @@
+from typing import Set
+
 import requests
 
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
@@ -5,13 +7,14 @@ from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuth
 
 class SessionClient:
 
-    def __init__(self, base_url: str, headers: dict = {}) -> None:
+    STATUS_CODES_TO_PROCESS: Set[int] = {200, 400, 401}
 
-        self.STATUS_CODES_TO_PROCESS = {200, 400, 401}
+    def __init__(self, base_url: str, headers: dict = {}) -> None:
 
         self.base_url: str = base_url
         self.session: requests.Session = requests.Session()
-        self.session.headers.update(headers)
+
+        self.update_headers(headers)
 
     def update_headers(self, headers: dict = {}) -> None:
         self.session.headers.update(headers)
@@ -20,6 +23,7 @@ class SessionClient:
         self.session.headers.pop(header_name)
 
     def request(self, method: str, path: str, params: dict = None, data: dict = None) -> dict:
+        
         request = requests.Request(
             method=method.upper(),
             url=self.base_url + path,

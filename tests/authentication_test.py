@@ -1,5 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
-from OrderErrorInfo import OrderErrorInfo
+from exceptions import OrderErrorInfo # FAKE
 from responses import FullOrderInfo
 
 
