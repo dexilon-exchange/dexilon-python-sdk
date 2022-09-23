@@ -13,6 +13,8 @@ target/
 .git
 .idea
 
+__pycache__
+
 ### IntelliJ IDEA ###
 .idea
 *.iws

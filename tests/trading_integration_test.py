@@ -1,3 +1,5 @@
+import time
+
 from DexilonClientImpl import DexilonClientImpl
 from OrderErrorInfo import OrderErrorInfo
 from responses import FullOrderInfo, LeverageUpdateInfo
@@ -12,7 +14,7 @@ class TestTradingIntegration:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://dex-dev-api.cronrate.com/api/v1')
 
     def test_create_market_order(self):
         full_order_info = self.test_instance.market_order('TEST_MARKET_ORDER_1', 'eth_usdc', 'SELL', 0.20)
@@ -24,7 +26,7 @@ class TestTradingIntegration:
         assert 'NEW_ORDER_REJECTED' in order_submit_result.state
 
     def test_create_limit_order(self):
-        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1650.0, 0.2)
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1050.0, 0.2)
         assert isinstance(full_order_info, FullOrderInfo) and full_order_info.orderId is not None
 
     def test_create_limit_order_with_rejected_state(self):
@@ -52,20 +54,24 @@ class TestTradingIntegration:
     def test_should_get_all_open_orders(self): #
         full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
 
+        time.sleep(3) #TODO: remove after it will be fixed on backend: order does not appear immediatelly in open order list
+
         open_orders = self.test_instance.get_open_orders()
         assert len(open_orders) > 0
 
         self.test_instance.cancel_order(full_order_info.orderId, full_order_info.symbol)
 
-    # def test_should_get_order_info(self): #
-    #     full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
-    #
-    #     order_info = self.test_instance.get_order_info(full_order_info.orderId, full_order_info.symbol)
-    #     assert order_info is not None
-    #     assert isinstance(order_info, FullOrderInfo)
-    #     cancel_result = self.test_instance.cancel_order(order_info.orderId, order_info.symbol)
-    #     assert cancel_result is not None
-    #     assert isinstance(cancel_result, FullOrderInfo)
+    def test_should_get_order_info(self): #
+        full_order_info = self.test_instance.limit_order('TEST_LIMIT_ORDER_2', 'eth_usdc', 'BUY', 1200.0, 0.2)
+
+        time.sleep(3)  # TODO: remove after it will be fixed on backend: order does not appear immediatelly in open order list
+
+        order_info = self.test_instance.get_order_info(full_order_info.orderId, full_order_info.symbol)
+        assert order_info is not None
+        assert isinstance(order_info, FullOrderInfo)
+        cancel_result = self.test_instance.cancel_order(order_info.orderId, order_info.symbol)
+        assert cancel_result is not None
+        assert isinstance(cancel_result, FullOrderInfo)
 
     def test_should_error_on_cancel_wrong_order(self):
         cancel_result = self.test_instance.cancel_order('RANDOMID1', 'eth_usdc')
@@ -82,5 +88,6 @@ class TestTradingIntegration:
             assert 'REJECTED' in order_submit_result.state
 
     def test_should_set_leverage(self):
+        self.test_instance.cancel_all_orders();
         leverage_update = self.test_instance.set_leverage('eth_usdc', 1)
         assert isinstance(leverage_update, LeverageUpdateInfo)

@@ -19,10 +19,21 @@ class ServiceResponse(BaseModel):
 
 class AvailableSymbol(BaseModel):
     symbol: str
-    isFavorite: bool
     lastPrice: Optional[float]
     volume: Optional[float]
     price24Percentage: Optional[float]
+
+
+class AddressCosmosMapping(BaseModel):
+    chainId: int
+    address: str
+    cosmosAddress: str
+
+
+class CosmosAddressMapping(BaseModel):
+    addressMapping: Optional[AddressCosmosMapping]
+    code: Optional[int]
+    message: Optional[str]
 
 
 class AvailableSymbolsResponse(BaseModel):

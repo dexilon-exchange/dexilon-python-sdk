@@ -16,11 +16,12 @@ from typing import List
 
 from responses import AvailableSymbol, OrderBookInfo, NonceResponse, JWTTokenResponse, OrderEvent, \
     ServiceResponse, ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    FullOrderInfo, LeverageUpdateInfo
+    FullOrderInfo, LeverageUpdateInfo, CosmosAddressMapping
 
 
 class DexilonClientImpl(DexilonClient):
     API_URL = 'https://dex-dev-api.cronrate.com/api/v1'
+    COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
 
     JWT_KEY = ''
     REFRESH_TOKEN = ''
@@ -28,6 +29,7 @@ class DexilonClientImpl(DexilonClient):
     pk1 = ''
 
     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    cosmos_headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
     def __init__(self, metamask_address, api_secret):
         """ Dexilon API Client constructor
@@ -43,6 +45,7 @@ class DexilonClientImpl(DexilonClient):
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
+        self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
 
     def change_api_url(self, api_url):
         """
@@ -155,10 +158,17 @@ class DexilonClientImpl(DexilonClient):
 
     def _request(self, method: str, path: str, params: dict = None, data: dict = None,
                  model: BaseModel = None) -> BaseModel:
+        return self.request_with_client(self.client, method, path, params, data, model)
 
+    def _request_dexilon_api(self, method: str, path: str, params: dict = None, data: dict = None,
+                 model: BaseModel = None) -> BaseModel:
+        return self.request_with_client(self.dex_session_client, method, path, params, data, model)
+
+    def request_with_client(self, client, method: str, path: str, params: dict = None, data: dict = None,
+                 model: BaseModel = None) -> BaseModel:
         try:
             return self._handle_response_new(
-                response=self.client.request(
+                response=client.request(
                     method=method,
                     path=path,
                     params=params,
@@ -179,7 +189,11 @@ class DexilonClientImpl(DexilonClient):
             )
 
     def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
-        data: dict = response['body']
+        data: dict
+        if 'body' in response:
+            data = response['body']
+        else:
+            data = response
         if data is None:
             service_response = parse_obj_as(ServiceResponse, response)
             return service_response
@@ -223,7 +237,15 @@ class DexilonClientImpl(DexilonClient):
             encode_defunct(str.encode(nonce)), private_key=self.pk1
         ).signature.hex()
 
+    def get_cosmos_address_mapping(self, eth_address: str):
+        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + eth_address, model=CosmosAddressMapping)
+        return cosmos_maping_response
+
+
     def authenticate(self):
+
+
+
         payload = {'metamaskAddress': self.METAMASK_ADDRESS.lower()}
         self.client.delete_header("MetamaskAddress")
         nonce_response = self._request('POST', '/auth/startAuth', data=payload, model=NonceResponse)
