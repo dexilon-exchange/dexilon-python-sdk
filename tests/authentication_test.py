@@ -9,17 +9,18 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://testnet.dexilon.io/api/v1')
+        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
 
     def test_should_get_cosmos_address_mapping_successfully(self):
         cosmos_address_maping = self.test_instance.get_cosmos_address_mapping(self.TEST_METAMASK_ADDRESS)
         assert cosmos_address_maping is not None
-        assert 'addressMapping' in cosmos_address_maping
+        assert cosmos_address_maping.addressMapping is not None
 
 
     def test_should_get_address_not_found_if_there_is_no_mapping(self):
         cosmos_address_maping = self.test_instance.get_cosmos_address_mapping(self.TEST_METAMASK_ADDRESS + "_WRONG")
         assert cosmos_address_maping is not None
+        assert cosmos_address_maping.code == 5
 
     def test_should_authenticate(self):
         self.test_instance.authenticate()

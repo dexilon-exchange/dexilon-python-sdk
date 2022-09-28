@@ -68,11 +68,14 @@ class OrderEvent(BaseModel):
 
 class PositionInfo(BaseModel):
     symbol: str
+    marginMode: Optional[str]
     amount: float
     basePrice: float
-    liqPrice: float
-    pl: float
-    plPercentage: int
+    liquidationPrice: Optional[float]
+    markPrice: Optional[float]
+    upl: Optional[float]
+    uplPercentage: Optional[int]
+    lockedBalance: Optional[float]
     leverage: int
 
 
@@ -80,9 +83,12 @@ class OrderBalanceInfo(BaseModel):
     symbol: str
     lockedAsk: float
     lockedBid: float
+    sumSizeAsk: float
+    sumSizeBid: float
 
 
 class AccountInfo(BaseModel):
+    deposited: float
     margin: float
     locked: float
     upl: float

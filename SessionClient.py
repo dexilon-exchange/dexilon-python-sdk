@@ -35,6 +35,9 @@ class SessionClient:
 
             data = response.json()
 
+            if response.status_code == 404 and 'code' in data:
+                return data
+
             if not response.status_code in self.STATUS_CODES_TO_PROCESS:
                 errors = data.get('errors', {})
                 raise DexilonAPIException(
