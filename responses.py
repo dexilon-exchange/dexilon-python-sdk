@@ -19,10 +19,21 @@ class ServiceResponse(BaseModel):
 
 class AvailableSymbol(BaseModel):
     symbol: str
-    isFavorite: bool
     lastPrice: Optional[float]
     volume: Optional[float]
     price24Percentage: Optional[float]
+
+
+class AddressCosmosMapping(BaseModel):
+    chainId: int
+    address: str
+    cosmosAddress: str
+
+
+class CosmosAddressMapping(BaseModel):
+    addressMapping: Optional[AddressCosmosMapping]
+    code: Optional[int]
+    message: Optional[str]
 
 
 class AvailableSymbolsResponse(BaseModel):
@@ -57,11 +68,14 @@ class OrderEvent(BaseModel):
 
 class PositionInfo(BaseModel):
     symbol: str
+    marginMode: Optional[str]
     amount: float
     basePrice: float
-    liqPrice: float
-    pl: float
-    plPercentage: int
+    liquidationPrice: Optional[float]
+    markPrice: Optional[float]
+    upl: Optional[float]
+    uplPercentage: Optional[int]
+    lockedBalance: Optional[float]
     leverage: int
 
 
@@ -69,9 +83,12 @@ class OrderBalanceInfo(BaseModel):
     symbol: str
     lockedAsk: float
     lockedBid: float
+    sumSizeAsk: float
+    sumSizeBid: float
 
 
 class AccountInfo(BaseModel):
+    deposited: float
     margin: float
     locked: float
     upl: float

@@ -31,3 +31,10 @@ class DexilonAuthException(Exception) :
 
     def __str__(self):
         return 'DexilonAuthException: %s' % self.message
+
+class CosmosRequestException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return 'CosmosRequestException: %s' % self.message
