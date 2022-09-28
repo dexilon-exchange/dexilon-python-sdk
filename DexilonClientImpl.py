@@ -19,7 +19,7 @@ from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEve
 
 
 class DexilonClientImpl(DexilonClient):
-    API_URL = 'https://dex-dev-api.cronrate.com/api/v1'
+    API_URL = 'https://dex-dev2-api.cronrate.com/api/v1'
     COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
 
     JWT_KEY = ''
