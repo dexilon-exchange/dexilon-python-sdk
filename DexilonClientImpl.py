@@ -58,6 +58,14 @@ class DexilonClientImpl(DexilonClient):
         self.API_URL = api_url
         self.client.base_url = api_url
 
+    def change_cosmos_api_url(self, cosmos_api_url):
+        """
+        Used for testing purposes
+        :param cosmos_api_url:
+        :return:
+        """
+        self.COSMOS_ADDRESS_API_URL = cosmos_api_url
+
     def get_open_orders(self) -> List[OrderInfo]:
         self.check_authentication()
         all_open_orders_response = self._request('GET', '/orders/open', model=AllOpenOrders)
@@ -295,5 +303,4 @@ class DexilonClientImpl(DexilonClient):
             raise DexilonRequestException('Invalid Response: %s' % response.text)
 
     def register_dexilon_user(self, metamask_address: str):
-        sdkfskldflks
         pass
