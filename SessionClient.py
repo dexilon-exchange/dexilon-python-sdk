@@ -40,10 +40,7 @@ class SessionClient:
 
             if not response.status_code in self.STATUS_CODES_TO_PROCESS:
                 errors = data.get('errors', {})
-                raise DexilonAPIException(
-                    code=errors.get('code', [0])[0],
-                    message=errors.get('message', [''])[0]
-                )
+                raise DexilonAPIException(response)
 
             if response.status_code == 401:
                 raise DexilonAuthException(data)
