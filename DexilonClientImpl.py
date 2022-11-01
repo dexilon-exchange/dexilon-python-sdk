@@ -21,7 +21,7 @@ from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEve
 
 
 class DexilonClientImpl(DexilonClient):
-    API_URL = 'https://dex-dev-api.cronrate.com/api/v1'
+    API_URL = 'https://dex-dev2-api.cronrate.com/api/v1'
     COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
 
     JWT_KEY = ''
@@ -62,6 +62,14 @@ class DexilonClientImpl(DexilonClient):
         self.API_URL = api_url
         self.COSMOS_ADDRESS_API_URL = cosmos_address_api_url
 
+
+    def change_cosmos_api_url(self, cosmos_api_url):
+        """
+        Used for testing purposes
+        :param cosmos_api_url:
+        :return:
+        """
+        self.COSMOS_ADDRESS_API_URL = cosmos_api_url
 
     def get_open_orders(self) -> List[OrderInfo]:
         self.check_authentication()
@@ -314,5 +322,4 @@ class DexilonClientImpl(DexilonClient):
             raise DexilonRequestException('Invalid Response: %s' % response.text)
 
     def register_dexilon_user(self, metamask_address: str):
-        # sdkfskldflks
         pass

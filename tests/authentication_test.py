@@ -18,7 +18,8 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
+        # self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
+        self.test_instance.change_api_url('https://testnet-v2-api.dexilon-dev.xyz/api/v1')
 
     def test_should_get_cosmos_address_mapping_successfully(self):
         cosmos_address_maping = self.test_instance.get_cosmos_address_mapping(self.TEST_METAMASK_ADDRESS)
