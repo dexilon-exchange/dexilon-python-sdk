@@ -1,3 +1,5 @@
+import json
+import logging
 from datetime import datetime
 from typing import List
 
@@ -12,7 +14,7 @@ from DexilonClient import DexilonClient
 from ErrorBody import ErrorBody
 from OrderErrorInfo import OrderErrorInfo
 from SessionClient import SessionClient
-from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
+from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException,DexilonErrorBodyException
 from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEvent, \
     ServiceResponse, ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
     FullOrderInfo, LeverageUpdateInfo, CosmosAddressMapping
@@ -43,10 +45,13 @@ class DexilonClientImpl(DexilonClient):
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
+
+    def setup(self):
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
+        self.client.base_url = self.API_URL
         self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
 
-    def change_api_url(self, api_url):
+    def change_api_url(self, api_url, cosmos_address_api_url):
         """
         Used for testing purposes
 
@@ -54,9 +59,9 @@ class DexilonClientImpl(DexilonClient):
         :type api_url: str.
 
         """
-
         self.API_URL = api_url
-        self.client.base_url = api_url
+        self.COSMOS_ADDRESS_API_URL = cosmos_address_api_url
+
 
     def get_open_orders(self) -> List[OrderInfo]:
         self.check_authentication()
@@ -162,6 +167,7 @@ class DexilonClientImpl(DexilonClient):
         )
 
     def _handle_dexilon_response(self, response: dict, model: BaseModel = None) -> BaseModel:
+        logging.debug("response: %s" % (response))
         if response is None:
             service_response = parse_obj_as(ServiceResponse, response)
             return service_response
@@ -195,8 +201,21 @@ class DexilonClientImpl(DexilonClient):
             )
 
     def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
+        logging.debug("response: %s" % (response))
         data: dict = response['body']
         if data is None:
+            error_body: dict = response.get('errorBody')
+            if error_body:
+                raise DexilonErrorBodyException(
+                    ErrorBody(
+                        code=error_body.get('code'),
+                        name=error_body.get('name'),
+                        details=error_body.get('details', [])
+                    )
+                )
+            else:
+                raise DexilonRequestException(
+                    'body and errorBody is empty in response %s' % json.dumps(response))
             service_response = parse_obj_as(ServiceResponse, response)
             return service_response
         if model:
@@ -295,5 +314,5 @@ class DexilonClientImpl(DexilonClient):
             raise DexilonRequestException('Invalid Response: %s' % response.text)
 
     def register_dexilon_user(self, metamask_address: str):
-        sdkfskldflks
+        # sdkfskldflks
         pass
