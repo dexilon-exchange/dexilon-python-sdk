@@ -12,7 +12,7 @@ class DexilonClient():
         """
         pass
 
-    def get_order_info(self, order_id: str, symbol: str) -> FullOrderInfo:
+    def get_order_info(self, order_id: str, client_order_id: str, symbol: str) -> FullOrderInfo:
         """
         Returns order information by orderId
         :param order_id: Dexilon order id

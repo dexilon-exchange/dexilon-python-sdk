@@ -12,11 +12,6 @@ class DebugInfo(BaseModel):
     correlationId: Optional[str]
     stackTrace: Optional[str]
 
-class ServiceResponse(BaseModel):
-    errorBody: Optional[ErrorBody]
-    debugInfo: Optional[DebugInfo]
-
-
 class AvailableSymbol(BaseModel):
     symbol: str
     lastPrice: Optional[float]
@@ -62,8 +57,16 @@ class JWTTokenResponse(BaseModel):
 
 class OrderEvent(BaseModel):
     orderId: Optional[str]
-    eventType: str
-    event: dict
+    clientOrderId: Optional[str]
+    symbol: Optional[str]
+    amount: float
+    price: Optional[float]
+    filled: float
+    averageExecutionPrice: Optional[float]
+    type: str
+    side: str
+    status: str
+    updatedAt: datetime
 
 
 class PositionInfo(BaseModel):
@@ -87,12 +90,21 @@ class OrderBalanceInfo(BaseModel):
     sumSizeBid: float
 
 
+class AssetInfo(BaseModel):
+    name: str
+    deposited: Optional[float]
+    margin: Optional[float]
+    locked: Optional[float]
+    isMargin: Optional[bool]
+
+
 class AccountInfo(BaseModel):
-    deposited: float
-    margin: float
-    locked: float
     upl: float
     equity: float
+    feeTierStructure: int
+    feeTierDiscount: int
+    tradeFeeAsset: str
+    assets: List[AssetInfo]
     positions: List[PositionInfo]
     orders: List[OrderBalanceInfo]
 
@@ -130,7 +142,3 @@ class FullOrderInfo(BaseModel):
 class LeverageEvent(BaseModel):
     leverage: int
 
-
-class LeverageUpdateInfo(BaseModel):
-    eventType: str
-    event: LeverageEvent
