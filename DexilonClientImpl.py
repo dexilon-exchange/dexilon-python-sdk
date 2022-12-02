@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List
+import logging
 
 import requests as requests
 from eth_account.messages import encode_defunct
@@ -43,7 +44,12 @@ class DexilonClientImpl(DexilonClient):
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
+        # self.client: SessionClient = SessionClient(self.API_URL, self.headers)
+        # self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
+
+    def setup(self):
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
+        self.client.base_url = self.API_URL
         self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
 
     def change_api_url(self, api_url):
@@ -54,9 +60,8 @@ class DexilonClientImpl(DexilonClient):
         :type api_url: str.
 
         """
-
         self.API_URL = api_url
-        self.client.base_url = api_url
+        # self.client.base_url = api_url
 
     def change_cosmos_api_url(self, cosmos_api_url):
         """
@@ -65,7 +70,7 @@ class DexilonClientImpl(DexilonClient):
         :return:
         """
         self.COSMOS_ADDRESS_API_URL = cosmos_api_url
-        self.dex_session_client.base_url = cosmos_api_url
+        # self.dex_session_client.base_url = cosmos_api_url
 
     def get_open_orders(self) -> List[OrderInfo]:
         self.check_authentication()
@@ -150,6 +155,7 @@ class DexilonClientImpl(DexilonClient):
         )
 
     def _handle_dexilon_response(self, response: dict, model: BaseModel = None) -> BaseModel:
+        logging.debug("response: %s" % (response))
         if response is None:
             service_response = parse_obj_as(ErrorBody, response)
             return service_response
@@ -183,6 +189,7 @@ class DexilonClientImpl(DexilonClient):
             )
 
     def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
+        logging.debug("response: %s" % (response))
         # data: dict = response['body']
         # data: dict = response
         if response is None:
