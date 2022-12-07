@@ -55,6 +55,10 @@ class JWTTokenResponse(BaseModel):
     refreshToken: str
 
 
+class CosmosFaucetResponse(BaseModel):
+    result: bool
+
+
 class OrderEvent(BaseModel):
     orderId: Optional[str]
     clientOrderId: Optional[str]

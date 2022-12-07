@@ -1,7 +1,12 @@
+import secrets
 from datetime import datetime
 from typing import List
 
+import bip32utils
 import requests as requests
+from bip_utils import Bip39EntropyGenerator, Bip39MnemonicGenerator, Bip39MnemonicEncoder, Bip39SeedGenerator, \
+    Bip39Languages
+from eth_account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from pydantic import BaseModel, parse_obj_as
@@ -15,7 +20,7 @@ from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEvent, \
     ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    CosmosAddressMapping, LeverageEvent
+    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse
 
 
 class DexilonClientImpl(DexilonClient):
@@ -230,6 +235,11 @@ class DexilonClientImpl(DexilonClient):
                                                            model=CosmosAddressMapping)
         return cosmos_maping_response
 
+    def call_cosmos_faucet(self, cosmos_address: str):
+        json_request_body = {'address': cosmos_address}
+        cosmos_faucet_response = self._request_dexilon_api('POST', '/faucet', data=json_request_body, model=CosmosFaucetResponse)
+        return cosmos_faucet_response
+
     def hash_keccak(self, message: str):
         return Web3.solidityKeccak(['string'], [message])
 
@@ -262,6 +272,14 @@ class DexilonClientImpl(DexilonClient):
         self.JWT_KEY = jwt_token
         self.REFRESH_TOKEN = refresh_token
 
+
+    def registerNewUser(self, eth_network: int):
+        cosmos_address = self.generate_random_cosmos_address()
+        eth_account = self.generate_random_eth_wallet()
+        eth_address = eth_account.address
+
+
+
     def _handle_response(self, response):
         """Internal helper for handling API responses from the Dexilon server.
         Raises the appropriate exceptions when necessary; otherwise, returns the
@@ -282,3 +300,17 @@ class DexilonClientImpl(DexilonClient):
 
     def register_dexilon_user(self, metamask_address: str):
         pass
+
+    def generate_random_cosmos_address(self):
+        random_bytes = Bip39EntropyGenerator(128).Generate()
+        # mnemonic = Bip39MnemonicGenerator().FromEntropy(random_bytes)
+        mnemonic_encoded = Bip39MnemonicEncoder().Encode(random_bytes)
+        seed = Bip39SeedGenerator(mnemonic_encoded, Bip39Languages.ENGLISH).Generate()
+
+        return bip32utils.BIP32Key.fromEntropy(seed).Address()
+
+    def generate_random_eth_wallet(self):
+        priv = secrets.token_hex(32)
+        private_key = '0x' + priv
+        acct = Account.from_key(private_key)
+        return acct
