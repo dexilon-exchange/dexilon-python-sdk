@@ -56,7 +56,7 @@ class JWTTokenResponse(BaseModel):
 
 
 class CosmosFaucetResponse(BaseModel):
-    result: bool
+    result: Optional[dict]
 
 
 class OrderEvent(BaseModel):
@@ -146,3 +146,19 @@ class FullOrderInfo(BaseModel):
 class LeverageEvent(BaseModel):
     leverage: int
 
+class DexilonAccount(BaseModel):
+    type: Optional[str]
+    address: Optional[str]
+    account_number: Optional[int]
+    sequence: Optional[int]
+
+class DexilonAccountInfo(BaseModel):
+    account: Optional[DexilonAccount]
+
+
+class DexilonRegistrationInfoData(BaseModel):
+    txhash: Optional[str]
+    code: Optional[int]
+
+class DexilonRegistrationTransactionInfo(BaseModel):
+    tx_response: DexilonRegistrationInfoData

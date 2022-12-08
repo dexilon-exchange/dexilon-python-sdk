@@ -1,4 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
+from responses import CosmosFaucetResponse
 
 
 class TestAccountRegistration:
@@ -12,7 +13,7 @@ class TestAccountRegistration:
 
 
     def test_should_generate_cosmos_address(self):
-        cosmos_address = self.test_instance.generate_random_cosmos_address()
+        cosmos_address = self.test_instance.generate_random_cosmos_wallet()
         assert cosmos_address is not None
 
 
@@ -22,5 +23,16 @@ class TestAccountRegistration:
 
 
     def test_should_call_cosmos_faucet_successfully(self):
-        faucet_result = self.test_instance.call_cosmos_faucet('cosmos1BL5hNswKw1B5pgJTTwPtAJZuATN9mduVZ')
+        faucet_result = self.test_instance.call_cosmos_faucet('cosmos14m8eeep93z6ka5exp2ccazem7nyq8v77w23r6f')
         assert faucet_result is not None
+        assert isinstance(faucet_result, CosmosFaucetResponse)
+
+
+    def test_should_get_cosmos_address_signed(self):
+        result = self.test_instance.getSignature(None, 'cosmos14m8eeep93z6ka5exp2ccazem7nyq8v77w23r6f')
+        assert result is not None
+
+
+    def test_should_register_new_user(self):
+        result = self.test_instance.registerNewUser(80001, "dexilon-dev")
+        assert result is not None

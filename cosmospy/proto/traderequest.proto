@@ -1,0 +1,55 @@
+syntax = "proto3";
+package dexilon_exchange.dexilonL2.trading;
+
+import "gogo.proto";
+import "model_trading_balance.proto";
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/dexilon-exchange/dexilonL2/x/trading/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc DepositTradingBalance(DepositTradingBalanceRequest) returns (TradingBalanceResponse);
+  rpc WithdrawTradingBalance(WithdrawTradingBalanceRequest) returns (TradingBalanceResponse);
+  rpc Trade(TradeRequest) returns (TradeResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message DepositTradingBalanceRequest {
+  string accountAddress = 1;
+  string balance = 2 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string asset = 3;
+}
+
+message TradeRequest {
+  bool isBuy = 1;
+  string maker = 2;
+  string taker = 3;
+  string asset = 4;
+  string amount = 5 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string rate = 6 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string takerFee = 7 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];;
+  string takerAssetFee = 8;
+  string makerFee = 9 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];;
+  string makerAssetFee = 10;
+  uint32 makerLeverage = 11;
+  uint32 takerLeverage = 12;
+  string tradeId = 13;
+  string creator = 14;
+}
+
+message TradeResponse {}
+
+message WithdrawTradingBalanceRequest {
+  string accountAddress = 1;
+  string balance = 2 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string asset = 3;
+  string txHash = 4;
+  string creator = 5;
+}
+
+message TradingBalanceResponse {
+  string balance = 1 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string asset = 2;
+}
+// this line is used by starport scaffolding # proto/tx/message
