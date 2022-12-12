@@ -1,4 +1,5 @@
 from DexilonClientImpl import DexilonClientImpl
+from cosmospy import generate_wallet
 from responses import CosmosFaucetResponse
 
 
@@ -33,6 +34,15 @@ class TestAccountRegistration:
         assert result is not None
 
 
-    def test_should_register_new_user(self):
-        result = self.test_instance.registerNewUser(80001, "dexilon-dev")
+    def test_should_register_new_random_user(self):
+        result = self.test_instance.registerNewRandomUser(80001, "dexilon-dev")
+        assert result is not None
+
+
+    def test_should_register_new_user_from_existing_mnemonics(self):
+        cosmos_wallet = generate_wallet()
+        # cosmos_test_mnemonic = "derive blossom organ document arch rapid ginger invite attend radio scale hurry between payment defy distance february rough banner awful lock coral stock share"
+        cosmos_test_mnemonic = cosmos_wallet["seed"]
+        eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
+        result = self.test_instance.registerUserWithExistingMnemonics(cosmos_test_mnemonic, eth_test_mnemonic, 80001, "dexilon-dev")
         assert result is not None

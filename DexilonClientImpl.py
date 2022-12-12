@@ -5,7 +5,7 @@ from typing import List
 import requests as requests
 
 from _transaction import Transaction
-from cosmospy import generate_wallet
+from cosmospy import generate_wallet, _wallet
 from eth_account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
@@ -292,17 +292,30 @@ class DexilonClientImpl(DexilonClient):
         self.REFRESH_TOKEN = refresh_token
 
 
-    def registerNewUser(self, eth_chain_id: int, dexilon_chain_id: str):
-        cosmos_wallet = self.generate_random_cosmos_wallet()
+    def registerUserWithExistingMnemonics(self, cosmos_mnemonic:[], eth_mnemonic:[], eth_chain_id: int, dexilon_chain_id: str):
+        cosmos_wallet = self.generate_cosmos_wallet_from_mnemonic(cosmos_mnemonic)
+        Account.enable_unaudited_hdwallet_features()
+        eth_wallet = Account.from_mnemonic(eth_mnemonic)
+
+        return self.generate_new_cosmos_user(cosmos_wallet, eth_wallet, eth_chain_id, dexilon_chain_id)
+
+
+    def registerNewRandomUser(self, eth_chain_id: int, dexilon_chain_id: str):
+        cosmos_wallet = generate_wallet()
         if 'address' not in cosmos_wallet:
             raise DexilonRequestException('Was not able to generate Cosmos wallet')
+        eth_wallet = self.generate_random_eth_wallet()
+
+        return self.generate_new_cosmos_user(cosmos_wallet, eth_wallet, eth_chain_id, dexilon_chain_id)
+
+
+    def generate_new_cosmos_user(self, cosmos_wallet, eth_wallet, eth_chain_id: int, dexilon_chain_id: str):
         cosmos_address = cosmos_wallet['address']
         cosmos_faucet_response = self.call_cosmos_faucet(cosmos_address)
 
         if not isinstance(cosmos_faucet_response, CosmosFaucetResponse):
             raise DexilonRequestException('Was not able to receive response from faucet')
 
-        eth_wallet = self.generate_random_eth_wallet()
         eth_address = eth_wallet.address
 
         signature = self.getSignature(eth_wallet, cosmos_address)
@@ -318,7 +331,7 @@ class DexilonClientImpl(DexilonClient):
             sequence=cosmos_account_sequence,
             fee=0,
             fee_denom="dxln",
-            gas= 200_000,
+            gas=200_000,
             memo="",
             chain_id=dexilon_chain_id,
         )
@@ -335,7 +348,8 @@ class DexilonClientImpl(DexilonClient):
         tx_bytes = cosmo_tx.get_tx_bytes()
 
         json_request_body = {'tx_bytes': tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
-        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body, model=DexilonRegistrationTransactionInfo)
+        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body,
+                                                              model=DexilonRegistrationTransactionInfo)
 
         if cosmos_faucet_response.tx_response.code is not 0:
             print("Error while sending request for registration to Dexilon network for " + cosmos_address)
@@ -355,20 +369,6 @@ class DexilonClientImpl(DexilonClient):
 
     def get_cosmos_account_info(self, cosmos_address: str) -> DexilonAccountInfo:
         return self._request_dexilon_faucet('GET', '/cosmos/auth/v1beta1/accounts/' + cosmos_address, model=DexilonAccountInfo)
-
-    def updateAccountInfo(self):
-        api_url = self.cosmos_url + "/cosmos/auth/v1beta1/accounts/"
-        for i in range(self.NUMBER_OF_RETRIES):
-            try:
-                self.account_info = httpx.get(
-                    api_url + self.account_address, timeout=10.0
-                ).json()
-                break
-            except Exception as e:
-                print(f"Error Cosmos connect: {repr(e)}")
-                time.sleep(1 + i)
-                print(f"Retry Cosmos connect, attempt {i + 1}")
-
 
     def wrapObject(self, value):
         return {
@@ -410,12 +410,21 @@ class DexilonClientImpl(DexilonClient):
     def register_dexilon_user(self, metamask_address: str):
         pass
 
-    def generate_random_cosmos_wallet(self):
-        wallet = generate_wallet()
-        return wallet
+    def generate_cosmos_wallet_from_mnemonic(self, cosmos_mnemonic):
+        cosmos_private_key = _wallet.seed_to_privkey(cosmos_mnemonic)
+        cosmos_public_key = _wallet.privkey_to_pubkey(cosmos_private_key)
+        cosmos_address = _wallet.privkey_to_address(cosmos_private_key)
+        return {
+            "seed": cosmos_mnemonic,
+            "derivation_path": _wallet.DEFAULT_DERIVATION_PATH,
+            "private_key": cosmos_private_key,
+            "public_key": cosmos_public_key,
+            "address": cosmos_address,
+        }
 
     def generate_random_eth_wallet(self):
         priv = secrets.token_hex(32)
         private_key = '0x' + priv
         acct = Account.from_key(private_key)
         return acct
+
