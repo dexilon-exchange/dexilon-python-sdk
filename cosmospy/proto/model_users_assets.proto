@@ -1,0 +1,15 @@
+syntax = "proto3";
+package dexilon_exchange.dexilonl2.trading;
+
+import "gogo.proto";
+
+option go_package = "github.com/dexilon-exchange/dexilonL2/x/trading/types";
+
+message UsersAssets {
+  string accountAddress = 1;
+  string asset = 2;
+  string leverage = 3 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string balance = 4 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string lockedBalance = 5 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string price = 6 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+}

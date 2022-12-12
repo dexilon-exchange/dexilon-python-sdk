@@ -1,0 +1,44 @@
+syntax = "proto3";
+package dexilon_exchange.dexilonL2.registration;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/dexilon-exchange/dexilonL2/x/registration/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc CreateAddressMapping(MsgCreateAddressMapping) returns (MsgEmptyResponse);
+  rpc GrantPermission(MsgGrantPermissionRequest) returns (MsgEmptyResponse);
+  rpc RevokePermission(MsgRevokePermissionRequest) returns (MsgEmptyResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+}
+
+
+message MsgCreateAddressMapping {
+  string creator = 1;
+  int32 chainId = 2;
+  string address = 3;
+  string signature = 4;
+  string signedMessage = 5;
+}
+
+
+message MsgGrantPermissionRequest {
+  string creator = 1;
+  string granterEthAddress = 2;
+  string signature = 3;
+  string signedMessage = 4;
+  uint64 expirationTime = 5;
+}
+
+
+message MsgRevokePermissionRequest {
+  string creator = 1;
+  string granterEthAddress = 2;
+  string signature = 3;
+  string signedMessage = 4;
+}
+
+message MsgEmptyResponse {}
+
+// this line is used by starport scaffolding # proto/tx/message
