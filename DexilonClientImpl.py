@@ -50,14 +50,16 @@ class DexilonClientImpl(DexilonClient):
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
-        # self.client: SessionClient = SessionClient(self.API_URL, self.headers)
-        # self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
-
-    def setup(self):
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
-        self.client.base_url = self.API_URL
         self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
         self.dex_faucet_client: SessionClient = SessionClient(self.COSMOS_FAUCET_API_URL, self.cosmos_headers)
+
+
+    # def setup(self):
+    #     self.client: SessionClient = SessionClient(self.API_URL, self.headers)
+    #     self.client.base_url = self.API_URL
+    #     self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
+    #     self.dex_faucet_client: SessionClient = SessionClient(self.COSMOS_FAUCET_API_URL, self.cosmos_headers)
 
     def change_api_url(self, api_url):
         """
@@ -68,7 +70,7 @@ class DexilonClientImpl(DexilonClient):
 
         """
         self.API_URL = api_url
-        # self.client.base_url = api_url
+        self.client.base_url = api_url
 
     def change_cosmos_api_url(self, cosmos_api_url):
         """
@@ -77,7 +79,7 @@ class DexilonClientImpl(DexilonClient):
         :return:
         """
         self.COSMOS_ADDRESS_API_URL = cosmos_api_url
-        # self.dex_session_client.base_url = cosmos_api_url
+        self.dex_session_client.base_url = cosmos_api_url
 
 
     def change_cosmos_faucet_api_url(self, cosmos_faucet_api_url):
@@ -299,6 +301,126 @@ class DexilonClientImpl(DexilonClient):
         self.REFRESH_TOKEN = refresh_token
 
 
+    def depositFundsToCosmosWallet(self, eth_mnemonic: [], asset: str, amount: int, eth_chain_id: int, dexilon_chain_id: str):
+        Account.enable_unaudited_hdwallet_features()
+        eth_wallet = Account.from_mnemonic(eth_mnemonic)
+        eth_address = eth_wallet.address
+
+        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
+        grantee_cosmos_wallet = generate_wallet()
+        grantee_cosmos_address = grantee_cosmos_wallet['address']
+
+        self.call_cosmos_faucet(grantee_cosmos_address)
+
+        account_info = self.get_cosmos_account_info(grantee_cosmos_address)
+
+        cosmos_account_number = account_info.account.account_number
+        cosmos_account_sequence = account_info.account.sequence
+
+        # grant permission request. Call MsgGrantPermissionRequest to give grantee grants to control granters funds
+
+        print("Sending Grant permission transaction to Dexilon Blockchain")
+
+        cosmos_grant_permission_tx = Transaction(
+            privkey=grantee_cosmos_wallet["private_key"],
+            account_num=cosmos_account_number,
+            sequence=cosmos_account_sequence,
+            fee=0,
+            fee_denom="dxln",
+            gas=200_000,
+            memo="",
+            chain_id=dexilon_chain_id,
+        )
+
+        cosmos_grant_permission_tx_data = {}
+
+        cur_time_in_milliseconds = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
+        nonce = str(cur_time_in_milliseconds) + '#' + grantee_cosmos_address
+        signature = self.getSignature(eth_wallet, nonce)
+
+        cosmos_grant_permission_tx_data["creator"] = grantee_cosmos_wallet['address']
+        cosmos_grant_permission_tx_data["granter_eth_address"] = eth_address
+        cosmos_grant_permission_tx_data["signature"] = signature
+        cosmos_grant_permission_tx_data["signedMessage"] = nonce
+        cosmos_grant_permission_tx_data["expirationTime"] = 15 * 60
+
+        cosmos_grant_permission_tx.add_grant_permission(**cosmos_grant_permission_tx_data)
+        cosmos_grant_permission_tx_bytes = cosmos_grant_permission_tx.get_tx_bytes()
+
+        json_request_body = {'tx_bytes': cosmos_grant_permission_tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
+        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body, model=dict)
+
+        if cosmos_faucet_response.tx_response.code is not 0:
+            print("Error while sending transaction for grant permission. Granter wallet: " + granter_cosmos_address)
+            raise DexilonRequestException("Error while sending transaction for grant permission. Granter wallet: " + granter_cosmos_address)
+
+        print("Transaction for grant permission is successfull. Granter Dexilon wallet: " + granter_cosmos_address + "; Eth address: " + eth_address)
+
+        # using given grant create deposit trading transaction wrapped to AuthZ module(authz_exec)
+
+        cosmo_tx = Transaction(
+            privkey=grantee_cosmos_wallet["private_key"],
+            account_num=cosmos_account_number,
+            sequence=cosmos_account_sequence,
+            fee=0,
+            fee_denom="dxln",
+            gas=200_000,
+            memo="",
+            chain_id=dexilon_chain_id,
+        )
+
+        cosmos_tx_data = {}
+        cosmos_tx_data["recipient"] = granter_cosmos_address.addressMapping.cosmosAddress
+        cosmos_tx_data["balance"] = str(amount)
+        cosmos_tx_data["denom"] = asset
+
+        cosmo_tx.add_deposit(**cosmos_tx_data)
+
+        tx_bytes = cosmo_tx.get_tx_bytes()
+
+        print("Sending transaction for deposit to trading account")
+
+        account_info = self.get_cosmos_account_info(grantee_cosmos_address)
+
+        cosmos_account_number = account_info.account.account_number
+        cosmos_account_sequence = account_info.account.sequence
+
+
+        cosmos_auth_tx = Transaction(
+            privkey=grantee_cosmos_wallet["private_key"],
+            account_num=cosmos_account_number,
+            sequence=cosmos_account_sequence,
+            fee=0,
+            fee_denom="dxln",
+            gas=200_000,
+            memo="",
+            chain_id=dexilon_chain_id,
+        )
+
+        cosmos_auth_tx.add_auth_tx(grantee_cosmos_address, tx_bytes)
+
+        cosmos_auth_tx_bytes = cosmos_auth_tx.get_tx_bytes()
+
+        json_request_body = {'tx_bytes': cosmos_auth_tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
+        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body, model=dict)
+
+        if cosmos_faucet_response.tx_response.code is not 0:
+            print("Error while sending request for registration to Dexilon network for " + granter_cosmos_address)
+            raise DexilonRequestException("Error trying to register new user in Dexilon network: " + granter_cosmos_address)
+
+
+
+
+
+
+
+    def callCosmosFaucetForAddress(self, cosmos_address: str):
+        cosmos_faucet_response = self.call_cosmos_faucet(cosmos_address)
+
+        if not isinstance(cosmos_faucet_response, CosmosFaucetResponse):
+            raise DexilonRequestException('Was not able to receive response from faucet')
+
+
     def registerUserWithExistingMnemonics(self, cosmos_mnemonic:[], eth_mnemonic:[], eth_chain_id: int, dexilon_chain_id: str):
         cosmos_wallet = self.generate_cosmos_wallet_from_mnemonic(cosmos_mnemonic)
         Account.enable_unaudited_hdwallet_features()
@@ -318,10 +440,7 @@ class DexilonClientImpl(DexilonClient):
 
     def generate_new_cosmos_user(self, cosmos_wallet, eth_wallet, eth_chain_id: int, dexilon_chain_id: str):
         cosmos_address = cosmos_wallet['address']
-        cosmos_faucet_response = self.call_cosmos_faucet(cosmos_address)
-
-        if not isinstance(cosmos_faucet_response, CosmosFaucetResponse):
-            raise DexilonRequestException('Was not able to receive response from faucet')
+        self.call_cosmos_faucet(cosmos_address)
 
         eth_address = eth_wallet.address
 
@@ -391,8 +510,8 @@ class DexilonClientImpl(DexilonClient):
         }
 
 
-    def getSignature(self, eth_wallet, cosmos_address: str):
-        solidity_keccak256_hash = Web3.solidityKeccak(['string'], [cosmos_address])
+    def getSignature(self, eth_wallet, message_to_sign: str):
+        solidity_keccak256_hash = Web3.solidityKeccak(['string'], [message_to_sign])
         return w3.eth.account.sign_message(encode_defunct(solidity_keccak256_hash), private_key=eth_wallet.privateKey).signature.hex()
 
 
@@ -434,4 +553,5 @@ class DexilonClientImpl(DexilonClient):
         private_key = '0x' + priv
         acct = Account.from_key(private_key)
         return acct
+
 

@@ -9,8 +9,10 @@ class TestAccountRegistration:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
+        # self.test_instance.setup()
         self.test_instance.change_api_url('http://api.dev.dexilon.io/api/v1')
-        self.test_instance.change_cosmos_api_url('http://10.13.0.48:1317/dexilon-exchange/dexilonl2')
+        self.test_instance.change_cosmos_api_url('http://65.108.44.122:1317/dexilon-exchange/dexilonl2')
+        self.test_instance.change_cosmos_faucet_api_url('http://65.108.44.122:4000')
 
 
     def test_should_generate_cosmos_address(self):
@@ -19,7 +21,7 @@ class TestAccountRegistration:
 
 
     def test_should_generate_eth_address(self):
-        eth_address = self.test_instance.generate_random_eth_wallet();
+        eth_address = self.test_instance.generate_random_eth_wallet()
         assert eth_address is not None
 
 
@@ -46,3 +48,9 @@ class TestAccountRegistration:
         eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
         result = self.test_instance.registerUserWithExistingMnemonics(cosmos_test_mnemonic, eth_test_mnemonic, 80001, "dexilon-dev")
         assert result is not None
+
+
+    def test_should_deposit_funds_successfully(self):
+        eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
+        cosmos_deposit_update = self.test_instance.depositFundsToCosmosWallet(eth_test_mnemonic, 'usdt', 1, 80001, "dexilon-dev")
+        assert cosmos_deposit_update is not None

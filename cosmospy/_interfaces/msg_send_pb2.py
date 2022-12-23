@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 import cosmospy._interfaces.gogo_pb2 as gogo__pb2
 import cosmospy._interfaces.coin_pb2 as coin__pb2
-import cosmospy._interfaces.cosmos_pb2 as cosmos__pb2
+import cosmospy._interfaces.cosmos_pb2_old as cosmos__pb2
 import cosmospy._interfaces.msg_pb2 as msg__pb2
 from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 

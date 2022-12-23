@@ -4,7 +4,6 @@
 """Generated protocol buffer code."""
 from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
-from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -16,27 +15,188 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63osmos.proto\x12\x0c\x63osmos_proto\x1a google/protobuf/descriptor.proto\"8\n\x13InterfaceDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"c\n\x10ScalarDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12,\n\nfield_type\x18\x03 \x03(\x0e\x32\x18.cosmos_proto.ScalarType*X\n\nScalarType\x12\x1b\n\x17SCALAR_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12SCALAR_TYPE_STRING\x10\x01\x12\x15\n\x11SCALAR_TYPE_BYTES\x10\x02:?\n\x14implements_interface\x12\x1f.google.protobuf.MessageOptions\x18\xc9\xd6\x05 \x03(\t::\n\x11\x61\x63\x63\x65pts_interface\x12\x1d.google.protobuf.FieldOptions\x18\xc9\xd6\x05 \x01(\t:/\n\x06scalar\x12\x1d.google.protobuf.FieldOptions\x18\xca\xd6\x05 \x01(\t:\\\n\x11\x64\x65\x63lare_interface\x12\x1c.google.protobuf.FileOptions\x18\xbd\xb3\x30 \x03(\x0b\x32!.cosmos_proto.InterfaceDescriptor:V\n\x0e\x64\x65\x63lare_scalar\x12\x1c.google.protobuf.FileOptions\x18\xbe\xb3\x30 \x03(\x0b\x32\x1e.cosmos_proto.ScalarDescriptorB-Z+github.com/cosmos/cosmos-proto;cosmos_protob\x06proto3')
+DESCRIPTOR = _descriptor.FileDescriptor(
+  name='cosmos.proto',
+  package='cosmos_proto',
+  syntax='proto3',
+  serialized_options=b'Z+github.com/cosmos/cosmos-proto;cosmos_proto',
+  create_key=_descriptor._internal_create_key,
+  serialized_pb=b'\n\x0c\x63osmos.proto\x12\x0c\x63osmos_proto\x1a google/protobuf/descriptor.proto\"8\n\x13InterfaceDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"c\n\x10ScalarDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12,\n\nfield_type\x18\x03 \x03(\x0e\x32\x18.cosmos_proto.ScalarType*X\n\nScalarType\x12\x1b\n\x17SCALAR_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12SCALAR_TYPE_STRING\x10\x01\x12\x15\n\x11SCALAR_TYPE_BYTES\x10\x02:?\n\x14implements_interface\x12\x1f.google.protobuf.MessageOptions\x18\xc9\xd6\x05 \x03(\t::\n\x11\x61\x63\x63\x65pts_interface\x12\x1d.google.protobuf.FieldOptions\x18\xc9\xd6\x05 \x01(\t:/\n\x06scalar\x12\x1d.google.protobuf.FieldOptions\x18\xca\xd6\x05 \x01(\t:\\\n\x11\x64\x65\x63lare_interface\x12\x1c.google.protobuf.FileOptions\x18\xbd\xb3\x30 \x03(\x0b\x32!.cosmos_proto.InterfaceDescriptor:V\n\x0e\x64\x65\x63lare_scalar\x12\x1c.google.protobuf.FileOptions\x18\xbe\xb3\x30 \x03(\x0b\x32\x1e.cosmos_proto.ScalarDescriptorB-Z+github.com/cosmos/cosmos-proto;cosmos_protob\x06proto3'
+  ,
+  dependencies=[google_dot_protobuf_dot_descriptor__pb2.DESCRIPTOR,])
 
-_SCALARTYPE = DESCRIPTOR.enum_types_by_name['ScalarType']
+_SCALARTYPE = _descriptor.EnumDescriptor(
+  name='ScalarType',
+  full_name='cosmos_proto.ScalarType',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='SCALAR_TYPE_UNSPECIFIED', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SCALAR_TYPE_STRING', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SCALAR_TYPE_BYTES', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=223,
+  serialized_end=311,
+)
+_sym_db.RegisterEnumDescriptor(_SCALARTYPE)
+
 ScalarType = enum_type_wrapper.EnumTypeWrapper(_SCALARTYPE)
 SCALAR_TYPE_UNSPECIFIED = 0
 SCALAR_TYPE_STRING = 1
 SCALAR_TYPE_BYTES = 2
 
 IMPLEMENTS_INTERFACE_FIELD_NUMBER = 93001
-implements_interface = DESCRIPTOR.extensions_by_name['implements_interface']
+implements_interface = _descriptor.FieldDescriptor(
+  name='implements_interface', full_name='cosmos_proto.implements_interface', index=0,
+  number=93001, type=9, cpp_type=9, label=3,
+  has_default_value=False, default_value=[],
+  message_type=None, enum_type=None, containing_type=None,
+  is_extension=True, extension_scope=None,
+  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
 ACCEPTS_INTERFACE_FIELD_NUMBER = 93001
-accepts_interface = DESCRIPTOR.extensions_by_name['accepts_interface']
+accepts_interface = _descriptor.FieldDescriptor(
+  name='accepts_interface', full_name='cosmos_proto.accepts_interface', index=1,
+  number=93001, type=9, cpp_type=9, label=1,
+  has_default_value=False, default_value=b"".decode('utf-8'),
+  message_type=None, enum_type=None, containing_type=None,
+  is_extension=True, extension_scope=None,
+  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
 SCALAR_FIELD_NUMBER = 93002
-scalar = DESCRIPTOR.extensions_by_name['scalar']
+scalar = _descriptor.FieldDescriptor(
+  name='scalar', full_name='cosmos_proto.scalar', index=2,
+  number=93002, type=9, cpp_type=9, label=1,
+  has_default_value=False, default_value=b"".decode('utf-8'),
+  message_type=None, enum_type=None, containing_type=None,
+  is_extension=True, extension_scope=None,
+  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
 DECLARE_INTERFACE_FIELD_NUMBER = 793021
-declare_interface = DESCRIPTOR.extensions_by_name['declare_interface']
+declare_interface = _descriptor.FieldDescriptor(
+  name='declare_interface', full_name='cosmos_proto.declare_interface', index=3,
+  number=793021, type=11, cpp_type=10, label=3,
+  has_default_value=False, default_value=[],
+  message_type=None, enum_type=None, containing_type=None,
+  is_extension=True, extension_scope=None,
+  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
 DECLARE_SCALAR_FIELD_NUMBER = 793022
-declare_scalar = DESCRIPTOR.extensions_by_name['declare_scalar']
+declare_scalar = _descriptor.FieldDescriptor(
+  name='declare_scalar', full_name='cosmos_proto.declare_scalar', index=4,
+  number=793022, type=11, cpp_type=10, label=3,
+  has_default_value=False, default_value=[],
+  message_type=None, enum_type=None, containing_type=None,
+  is_extension=True, extension_scope=None,
+  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
 
-_INTERFACEDESCRIPTOR = DESCRIPTOR.message_types_by_name['InterfaceDescriptor']
-_SCALARDESCRIPTOR = DESCRIPTOR.message_types_by_name['ScalarDescriptor']
+
+_INTERFACEDESCRIPTOR = _descriptor.Descriptor(
+  name='InterfaceDescriptor',
+  full_name='cosmos_proto.InterfaceDescriptor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='cosmos_proto.InterfaceDescriptor.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='description', full_name='cosmos_proto.InterfaceDescriptor.description', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=64,
+  serialized_end=120,
+)
+
+
+_SCALARDESCRIPTOR = _descriptor.Descriptor(
+  name='ScalarDescriptor',
+  full_name='cosmos_proto.ScalarDescriptor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='cosmos_proto.ScalarDescriptor.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='description', full_name='cosmos_proto.ScalarDescriptor.description', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='field_type', full_name='cosmos_proto.ScalarDescriptor.field_type', index=2,
+      number=3, type=14, cpp_type=8, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=122,
+  serialized_end=221,
+)
+
+_SCALARDESCRIPTOR.fields_by_name['field_type'].enum_type = _SCALARTYPE
+DESCRIPTOR.message_types_by_name['InterfaceDescriptor'] = _INTERFACEDESCRIPTOR
+DESCRIPTOR.message_types_by_name['ScalarDescriptor'] = _SCALARDESCRIPTOR
+DESCRIPTOR.enum_types_by_name['ScalarType'] = _SCALARTYPE
+DESCRIPTOR.extensions_by_name['implements_interface'] = implements_interface
+DESCRIPTOR.extensions_by_name['accepts_interface'] = accepts_interface
+DESCRIPTOR.extensions_by_name['scalar'] = scalar
+DESCRIPTOR.extensions_by_name['declare_interface'] = declare_interface
+DESCRIPTOR.extensions_by_name['declare_scalar'] = declare_scalar
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
 InterfaceDescriptor = _reflection.GeneratedProtocolMessageType('InterfaceDescriptor', (_message.Message,), {
   'DESCRIPTOR' : _INTERFACEDESCRIPTOR,
   '__module__' : 'cosmos_pb2'
@@ -51,19 +211,13 @@ ScalarDescriptor = _reflection.GeneratedProtocolMessageType('ScalarDescriptor', 
   })
 _sym_db.RegisterMessage(ScalarDescriptor)
 
-if _descriptor._USE_C_DESCRIPTORS == False:
-  google_dot_protobuf_dot_descriptor__pb2.MessageOptions.RegisterExtension(implements_interface)
-  google_dot_protobuf_dot_descriptor__pb2.FieldOptions.RegisterExtension(accepts_interface)
-  google_dot_protobuf_dot_descriptor__pb2.FieldOptions.RegisterExtension(scalar)
-  google_dot_protobuf_dot_descriptor__pb2.FileOptions.RegisterExtension(declare_interface)
-  google_dot_protobuf_dot_descriptor__pb2.FileOptions.RegisterExtension(declare_scalar)
+google_dot_protobuf_dot_descriptor__pb2.MessageOptions.RegisterExtension(implements_interface)
+google_dot_protobuf_dot_descriptor__pb2.FieldOptions.RegisterExtension(accepts_interface)
+google_dot_protobuf_dot_descriptor__pb2.FieldOptions.RegisterExtension(scalar)
+declare_interface.message_type = _INTERFACEDESCRIPTOR
+google_dot_protobuf_dot_descriptor__pb2.FileOptions.RegisterExtension(declare_interface)
+declare_scalar.message_type = _SCALARDESCRIPTOR
+google_dot_protobuf_dot_descriptor__pb2.FileOptions.RegisterExtension(declare_scalar)
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z+github.com/cosmos/cosmos-proto;cosmos_proto'
-  _SCALARTYPE._serialized_start=223
-  _SCALARTYPE._serialized_end=311
-  _INTERFACEDESCRIPTOR._serialized_start=64
-  _INTERFACEDESCRIPTOR._serialized_end=120
-  _SCALARDESCRIPTOR._serialized_start=122
-  _SCALARDESCRIPTOR._serialized_end=221
+DESCRIPTOR._options = None
 # @@protoc_insertion_point(module_scope)

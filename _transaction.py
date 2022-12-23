@@ -13,6 +13,7 @@ import cosmospy._interfaces.traderequest_pb2 as trade
 import cosmospy._interfaces.registration_pb2 as registration
 import cosmospy._interfaces.pubkey_pb2 as pubkey
 import cosmospy._interfaces.tx_pb2 as tx
+import cosmospy._interfaces.tx_authz_pb2 as tx_auth
 
 
 class Transaction:
@@ -170,6 +171,42 @@ class Transaction:
             "/dexilon_exchange.dexilonL2.registration.MsgCreateAddressMapping"
         )
         self._tx_body.messages.append(msg_any)
+
+
+    def add_grant_permission(self,
+                             creator: str,
+                             granter_eth_address: str,
+                             signature: str,
+                             signedMessage: str,
+                             expirationTime: int):
+
+        msg = registration.MsgGrantPermissionRequest()
+        msg.creator = creator
+        msg.granterEthAddress = granter_eth_address
+        msg.signature = signature
+        msg.signedMessage = signedMessage
+        msg.expirationTime = expirationTime
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/dexilon_exchange.dexilonL2.registration.MsgGrantPermissionRequest"
+        )
+        self._tx_body.messages.append(msg_any)
+
+
+    def add_auth_tx(self, grantee:str, tx_bytes: str):
+        msg = tx_auth.MsgExec()
+        msg.grantee = grantee,
+        msg.msgs = [tx_bytes]
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/cosmos.authz.v1beta1.MsgExec"
+        )
+        self._tx_body.messages.append(msg_any)
+
 
     def add_custom_msg(self, unpacked_msg, type_url: str) -> None:
         msg_any = Any.Any()
