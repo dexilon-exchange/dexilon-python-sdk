@@ -11,10 +11,6 @@ from google.protobuf import symbol_database as _symbol_database
 
 _sym_db = _symbol_database.Default()
 
-
-import gogo_pb2 as gogo__pb2
-
-
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmodel_trading_balance.proto\x12\"dexilon_exchange.dexilonL2.trading\x1a\ngogo.proto\"x\n\x0eTradingBalance\x12\x16\n\x0e\x61\x63\x63ountAddress\x18\x01 \x01(\t\x12?\n\x07\x62\x61lance\x18\x02 \x01(\tB.\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.Int\xc8\xde\x1f\x00\x12\r\n\x05\x61sset\x18\x03 \x01(\tB7Z5github.com/dexilon-exchange/dexilonL2/x/trading/typesb\x06proto3')
 
 

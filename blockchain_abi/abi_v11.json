@@ -1,0 +1,583 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "USDC_address",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "depositor",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountUSDC",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "Deposit",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "isBuy",
+                "type": "bool"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "maker",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "taker",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "asset",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "assetAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "assetRate",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tradeFee",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "makerLeverage",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "takerLeverage",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "tradeId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "Trade",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountUSDC",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "Withdraw",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_newAssetName",
+                "type": "string"
+            }
+        ],
+        "name": "addNewSupportedAsset",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "userAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "feeAmount",
+                        "type": "int256"
+                    }
+                ],
+                "internalType": "struct DexilonTest_v11.FeesArray[]",
+                "name": "batchFees",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "batchFundingRateFees",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "bool",
+                        "name": "isBuy",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "makerAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "takerAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "assetName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetRate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tradeFee",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "makerLeverage",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "takerLeverage",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tradeId",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DexilonTest_v11.tradingArray[]",
+                "name": "batchTradingArray",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "batchTrade",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "bool",
+                        "name": "isBuy",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "makerIndex",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "takerIndex",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "assetIndex",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetRate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tradeFee",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "makerLeverage",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "takerLeverage",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tradeId",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DexilonTest_v11.tradingArrayIndexed[]",
+                "name": "batchTradingArray",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "batchTradeIndexed",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "int256",
+                "name": "assetAmount",
+                "type": "int256"
+            }
+        ],
+        "name": "btcToUsdcMarketConvert",
+        "outputs": [
+            {
+                "internalType": "int256",
+                "name": "",
+                "type": "int256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amountUSDC",
+                "type": "uint256"
+            }
+        ],
+        "name": "deposit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserBalances",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "assetName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "assetBalance",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetLockedBalance",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "assetPrice",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "assetLeverage",
+                        "type": "uint16"
+                    }
+                ],
+                "internalType": "struct DexilonTest_v11.userAssetParameters[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "indexedAddresses",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address payable",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "userAvailableBalance",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "userLockedBalance",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "asset",
+                "type": "string"
+            },
+            {
+                "internalType": "int256",
+                "name": "userAssetBalance",
+                "type": "int256"
+            },
+            {
+                "internalType": "uint16",
+                "name": "leverage",
+                "type": "uint16"
+            }
+        ],
+        "name": "resetUserAccount",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bool",
+                "name": "isBuy",
+                "type": "bool"
+            },
+            {
+                "internalType": "address",
+                "name": "maker",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "taker",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "asset",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "assetAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "assetRate",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tradeFee",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint16",
+                "name": "makerLeverage",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "takerLeverage",
+                "type": "uint16"
+            },
+            {
+                "internalType": "string",
+                "name": "tradeId",
+                "type": "string"
+            }
+        ],
+        "name": "trade",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "usersCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "usersIndex",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountUSDC",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "withdrawAll",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

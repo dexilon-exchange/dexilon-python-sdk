@@ -156,9 +156,9 @@ class DexilonAccountInfo(BaseModel):
     account: Optional[DexilonAccount]
 
 
-class DexilonRegistrationInfoData(BaseModel):
+class DexilonTransactionInfoData(BaseModel):
     txhash: Optional[str]
     code: Optional[int]
 
-class DexilonRegistrationTransactionInfo(BaseModel):
-    tx_response: DexilonRegistrationInfoData
+class DexilonTransactionResponseInfo(BaseModel):
+    tx_response: DexilonTransactionInfoData

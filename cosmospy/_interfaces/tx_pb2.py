@@ -11,11 +11,11 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import gogo_pb2 as gogo__pb2
-import coin_pb2 as coin__pb2
-import signing_pb2 as signing__pb2
-import any_pb2 as any__pb2
-import cosmos_pb2_old as cosmos__pb2
+import cosmospy._interfaces.gogo_pb2 as gogo__pb2
+import cosmospy._interfaces.coin_pb2 as coin__pb2
+import cosmospy._interfaces.signing_pb2 as signing__pb2
+import cosmospy._interfaces.any_pb2 as any__pb2
+import cosmospy._interfaces.cosmos_pb2 as cosmos__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(

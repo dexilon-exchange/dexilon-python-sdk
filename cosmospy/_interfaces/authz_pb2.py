@@ -11,11 +11,11 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import amino_pb2 as amino__pb2
-import cosmos_pb2_old as cosmos__pb2
+import cosmospy._interfaces.amino_pb2 as amino__pb2
+import cosmospy._interfaces.cosmos_pb2 as cosmos__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
-import gogo_pb2 as gogo__pb2
-from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
+import cosmospy._interfaces.gogo_pb2 as gogo__pb2
+import cosmospy._interfaces.any_pb2 as any__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -24,9 +24,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z$github.com/cosmos/cosmos-sdk/x/authz\310\341\036\000',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0b\x61uthz.proto\x12\x14\x63osmos.authz.v1beta1\x1a\x0b\x61mino.proto\x1a\x0c\x63osmos.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\ngogo.proto\x1a\x19google/protobuf/any.proto\"Z\n\x14GenericAuthorization\x12\x0b\n\x03msg\x18\x01 \x01(\t:5\x8a\xe7\xb0*\x1f\x63osmos-sdk/GenericAuthorization\xca\xb4-\rAuthorization\"\x81\x01\n\x05Grant\x12>\n\rauthorization\x18\x01 \x01(\x0b\x32\x14.google.protobuf.AnyB\x11\xca\xb4-\rAuthorization\x12\x38\n\nexpiration\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\x90\xdf\x1f\x01\xc8\xde\x1f\x01\"\xe0\x01\n\x12GrantAuthorization\x12)\n\x07granter\x18\x01 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12)\n\x07grantee\x18\x02 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12>\n\rauthorization\x18\x03 \x01(\x0b\x32\x14.google.protobuf.AnyB\x11\xca\xb4-\rAuthorization\x12\x34\n\nexpiration\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x04\x90\xdf\x1f\x01\"\'\n\x0eGrantQueueItem\x12\x15\n\rmsg_type_urls\x18\x01 \x03(\tB*Z$github.com/cosmos/cosmos-sdk/x/authz\xc8\xe1\x1e\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0b\x61uthz.proto\x12\x14\x63osmos.authz.v1beta1\x1a\x0b\x61mino.proto\x1a\x0c\x63osmos.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\ngogo.proto\x1a\tany.proto\"Z\n\x14GenericAuthorization\x12\x0b\n\x03msg\x18\x01 \x01(\t:5\x8a\xe7\xb0*\x1f\x63osmos-sdk/GenericAuthorization\xca\xb4-\rAuthorization\"\x81\x01\n\x05Grant\x12>\n\rauthorization\x18\x01 \x01(\x0b\x32\x14.google.protobuf.AnyB\x11\xca\xb4-\rAuthorization\x12\x38\n\nexpiration\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\x90\xdf\x1f\x01\xc8\xde\x1f\x01\"\xe0\x01\n\x12GrantAuthorization\x12)\n\x07granter\x18\x01 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12)\n\x07grantee\x18\x02 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12>\n\rauthorization\x18\x03 \x01(\x0b\x32\x14.google.protobuf.AnyB\x11\xca\xb4-\rAuthorization\x12\x34\n\nexpiration\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x04\x90\xdf\x1f\x01\"\'\n\x0eGrantQueueItem\x12\x15\n\rmsg_type_urls\x18\x01 \x03(\tB*Z$github.com/cosmos/cosmos-sdk/x/authz\xc8\xe1\x1e\x00\x62\x06proto3'
   ,
-  dependencies=[amino__pb2.DESCRIPTOR,cosmos__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,gogo__pb2.DESCRIPTOR,google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
+  dependencies=[amino__pb2.DESCRIPTOR,cosmos__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,gogo__pb2.DESCRIPTOR,any__pb2.DESCRIPTOR,])
 
 
 
@@ -58,8 +58,8 @@ _GENERICAUTHORIZATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=136,
-  serialized_end=226,
+  serialized_start=120,
+  serialized_end=210,
 )
 
 
@@ -97,8 +97,8 @@ _GRANT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=229,
-  serialized_end=358,
+  serialized_start=213,
+  serialized_end=342,
 )
 
 
@@ -150,8 +150,8 @@ _GRANTAUTHORIZATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=361,
-  serialized_end=585,
+  serialized_start=345,
+  serialized_end=569,
 )
 
 
@@ -182,13 +182,13 @@ _GRANTQUEUEITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=587,
-  serialized_end=626,
+  serialized_start=571,
+  serialized_end=610,
 )
 
-_GRANT.fields_by_name['authorization'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_GRANT.fields_by_name['authorization'].message_type = any__pb2._ANY
 _GRANT.fields_by_name['expiration'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_GRANTAUTHORIZATION.fields_by_name['authorization'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_GRANTAUTHORIZATION.fields_by_name['authorization'].message_type = any__pb2._ANY
 _GRANTAUTHORIZATION.fields_by_name['expiration'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 DESCRIPTOR.message_types_by_name['GenericAuthorization'] = _GENERICAUTHORIZATION
 DESCRIPTOR.message_types_by_name['Grant'] = _GRANT

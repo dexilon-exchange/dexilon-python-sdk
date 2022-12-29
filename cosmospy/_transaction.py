@@ -10,8 +10,11 @@ import cosmospy._interfaces.any_pb2 as Any
 import cosmospy._interfaces.coin_pb2 as coin
 import cosmospy._interfaces.msg_send_pb2 as transfer
 import cosmospy._interfaces.traderequest_pb2 as trade
+import cosmospy._interfaces.registration_pb2 as registration
 import cosmospy._interfaces.pubkey_pb2 as pubkey
 import cosmospy._interfaces.tx_pb2 as tx
+import cosmospy._interfaces.tx_authz_pb2 as tx_auth
+import cosmospy._interfaces.ethereumbridge_pb2 as etheriumbridge
 
 
 class Transaction:
@@ -61,16 +64,36 @@ class Transaction:
         msg_any.type_url = "/cosmos.bank.v1beta1.MsgSend"
         self._tx_body.messages.append(msg_any)
 
-    def add_deposit(self, recipient: str, balance: str, denom: str = "usdc") -> None:
+    def add_deposit_tx(self, recipient: str, balance: str, denom: str = "usdt") -> None:
         msg = trade.DepositTradingBalanceRequest()
         msg.accountAddress = recipient
         msg.balance = balance
+
         msg_any = Any.Any()
         msg_any.Pack(msg)
         msg_any.type_url = (
             "/dexilon_exchange.dexilonl2.trading.DepositTradingBalanceRequest"
         )
         self._tx_body.messages.append(msg_any)
+        return msg_any
+
+
+    def add_withdraw_tx(self, granter: str, amount: int, eth_chain_id: int, denom:str = "usdt"):
+        msg = etheriumbridge.MsgWithdrawTransaction()
+        msg.creator = granter
+        msg.denom = denom
+        msg.amount = amount
+        msg.chainId = eth_chain_id
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/dexilon_exchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction"
+        )
+        self._tx_body.messages.append(msg_any)
+        return msg_any
+
+
 
     def add_trade(
         self,
@@ -150,6 +173,62 @@ class Transaction:
         )
         self._tx_body.messages.append(msg_any)
 
+    def add_registration(self,
+                         creator: str,
+                         chainId: int,
+                         address: str,
+                         signature: str,
+                         signedMessage: str) -> None:
+        msg = registration.MsgCreateAddressMapping()
+        msg.creator = creator
+        msg.chainId = chainId
+        msg.address = address
+        msg.signature = signature
+        msg.signedMessage = signedMessage
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/dexilon_exchange.dexilonL2.registration.MsgCreateAddressMapping"
+        )
+        self._tx_body.messages.append(msg_any)
+
+
+    def add_grant_permission(self,
+                             creator: str,
+                             granter_eth_address: str,
+                             signature: str,
+                             signedMessage: str,
+                             expirationTime: int):
+
+        msg = registration.MsgGrantPermissionRequest()
+        msg.creator = creator
+        msg.granterEthAddress = granter_eth_address
+        msg.signature = signature
+        msg.signedMessage = signedMessage
+        msg.expirationTime = expirationTime
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/dexilon_exchange.dexilonL2.registration.MsgGrantPermissionRequest"
+        )
+        self._tx_body.messages.append(msg_any)
+
+
+    def add_auth_tx(self, grantee:str, message: Any.Any):
+        msg = tx_auth.MsgExec()
+        msg.grantee = grantee
+        msg.msgs.append(message)
+
+        msg_any = Any.Any()
+        msg_any.Pack(msg)
+        msg_any.type_url = (
+            "/cosmos.authz.v1beta1.MsgExec"
+        )
+        self._tx_body.messages.append(msg_any)
+
+
     def add_custom_msg(self, unpacked_msg, type_url: str) -> None:
         msg_any = Any.Any()
         msg_any.Pack(unpacked_msg)
@@ -210,3 +289,5 @@ class Transaction:
         signer_infos.public_key.type_url = "/cosmos.crypto.secp256k1.PubKey"
         signer_infos.mode_info.single.mode = 1
         return signer_infos
+
+

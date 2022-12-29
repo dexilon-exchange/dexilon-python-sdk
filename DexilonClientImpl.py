@@ -1,11 +1,13 @@
+import json
 import secrets
-from datetime import datetime, time
+from datetime import datetime
 from typing import List
 import logging
+import time
 
 import requests as requests
 
-from _transaction import Transaction
+from cosmospy._transaction import Transaction
 from cosmospy import generate_wallet, _wallet
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -14,6 +16,7 @@ from pydantic import BaseModel, parse_obj_as
 from web3 import Web3
 from web3.auto import w3
 
+
 from DexilonClient import DexilonClient
 from ErrorBody import ErrorBody
 from OrderErrorInfo import OrderErrorInfo
@@ -21,13 +24,16 @@ from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEvent, \
     ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse, DexilonAccountInfo, DexilonRegistrationTransactionInfo
+    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse, DexilonAccountInfo, DexilonTransactionResponseInfo
 
 
 class DexilonClientImpl(DexilonClient):
     API_URL = 'https://dex-dev2-api.cronrate.com/api/v1'
     COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
     COSMOS_FAUCET_API_URL = 'http://proxy.dev.dexilon.io'
+    TIME_BETWEEN_BLOCKS = 5
+
+    DECIMALS_USDC = 6
 
     JWT_KEY = ''
     REFRESH_TOKEN = ''
@@ -301,17 +307,13 @@ class DexilonClientImpl(DexilonClient):
         self.REFRESH_TOKEN = refresh_token
 
 
-    def depositFundsToCosmosWallet(self, eth_mnemonic: [], asset: str, amount: int, eth_chain_id: int, dexilon_chain_id: str):
+    def get_eth_wallet_from_mnemonic(self, eth_mnemonic: []):
         Account.enable_unaudited_hdwallet_features()
-        eth_wallet = Account.from_mnemonic(eth_mnemonic)
-        eth_address = eth_wallet.address
+        return Account.from_mnemonic(eth_mnemonic)
 
-        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
-        grantee_cosmos_wallet = generate_wallet()
+
+    def grant_permission_to_grantee_wallet(self, grantee_cosmos_wallet, granter_cosmos_address: str, eth_wallet, eth_address, dexilon_chain_id: str):
         grantee_cosmos_address = grantee_cosmos_wallet['address']
-
-        self.call_cosmos_faucet(grantee_cosmos_address)
-
         account_info = self.get_cosmos_account_info(grantee_cosmos_address)
 
         cosmos_account_number = account_info.account.account_number
@@ -338,7 +340,7 @@ class DexilonClientImpl(DexilonClient):
         nonce = str(cur_time_in_milliseconds) + '#' + grantee_cosmos_address
         signature = self.getSignature(eth_wallet, nonce)
 
-        cosmos_grant_permission_tx_data["creator"] = grantee_cosmos_wallet['address']
+        cosmos_grant_permission_tx_data["creator"] = grantee_cosmos_address
         cosmos_grant_permission_tx_data["granter_eth_address"] = eth_address
         cosmos_grant_permission_tx_data["signature"] = signature
         cosmos_grant_permission_tx_data["signedMessage"] = nonce
@@ -348,13 +350,200 @@ class DexilonClientImpl(DexilonClient):
         cosmos_grant_permission_tx_bytes = cosmos_grant_permission_tx.get_tx_bytes()
 
         json_request_body = {'tx_bytes': cosmos_grant_permission_tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
-        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body, model=dict)
+        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body,
+                                                              model=DexilonTransactionResponseInfo)
 
         if cosmos_faucet_response.tx_response.code is not 0:
             print("Error while sending transaction for grant permission. Granter wallet: " + granter_cosmos_address)
-            raise DexilonRequestException("Error while sending transaction for grant permission. Granter wallet: " + granter_cosmos_address)
+            raise DexilonRequestException(
+                "Error while sending transaction for grant permission. Granter wallet: " + granter_cosmos_address)
 
-        print("Transaction for grant permission is successfull. Granter Dexilon wallet: " + granter_cosmos_address + "; Eth address: " + eth_address)
+        print("Transaction for grant permission is successfull. Granter Dexilon wallet: " + grantee_cosmos_wallet[
+            'address'] + "; Eth address: " + eth_address)
+
+    def rpc_connect(self):
+        # TODO: add Dexilon node here
+        rpc_list = [
+            "https://polygon-mumbai.g.alchemy.com/v2/YSB9dpzl-6DQcXynxssJXUHJQIAvIk5r",
+            "https://rpc-mumbai.matic.today",
+            "https://matic-mainnet.chainstacklabs.com",
+            "https://rpc-mumbai.maticvigil.com",
+        ]
+
+        for rpc in rpc_list:
+            w3 = Web3(Web3.HTTPProvider(rpc))
+            if w3.isConnected():
+                return w3
+
+    def deposit_funds_to_contract(self, eth_wallet, amount: int):
+
+        with open("../blockchain_abi/bridge_v10_abi.json", "r") as f:
+            bridge_abi = json.load(f)
+
+        w3 = self.rpc_connect()
+
+        user_address = eth_wallet.address
+
+        userAddress = Web3.toChecksumAddress(user_address)
+        token_address = Web3.toChecksumAddress("0x8f54629e7d660871abab8a6b4809a839ded396de")
+        final_amount = int(
+            int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
+        )
+        timestamp = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
+
+        approve_transaction_result = self.run_approve_transaction(userAddress, final_amount, eth_wallet, w3)
+
+        if isinstance(approve_transaction_result, tuple) is False or (len(approve_transaction_result) != 2 and approve_transaction_result[1] != 200):
+            raise Exception("Approve transaction was not run correctly")
+
+        deposit_contract = w3.eth.contract(
+            address="0x52039E2f8263cE47afdBBB3E5124F22Fc87F557E", abi=bridge_abi
+        )
+
+        try:
+            nonce = w3.eth.getTransactionCount(userAddress)
+            tx = deposit_contract.functions.deposit(token_address, amount).buildTransaction(
+                {
+                    # "address": w3.eth.getTransactionCount(userAddress),
+                    "nonce": nonce,
+                    "from": userAddress,
+                    "gasPrice": self.get_gas_price(),
+                    "gas": 200_000,
+                }
+            )
+
+            tx_response = self.sign_and_post_transaction(tx, "Deposit", eth_wallet, w3)
+            return tx_response
+
+        except Exception as web3_error:
+            return repr(web3_error), 400
+
+
+    def run_approve_transaction(self, address: str, amount: int, eth_wallet, w3):
+        with open("../blockchain_abi/usdt_abi.json", "r") as f:
+            usdt_abi = json.load(f)
+
+        usdt_contract = w3.eth.contract(
+            address=Web3.toChecksumAddress("0x8f54629e7d660871abab8a6b4809a839ded396de"), abi=usdt_abi
+        )
+
+        try:
+            nonce = w3.eth.getTransactionCount(address)
+            tx = usdt_contract.functions.approve(address, amount).buildTransaction(
+                {
+                    "nonce": nonce,
+                    "from": address,
+                    "gasPrice": self.get_gas_price(),
+                    "gas": 200_000,
+                }
+            )
+
+            return self.sign_and_post_transaction(tx, "approve", eth_wallet, w3)
+
+        except Exception as web3_error:
+            return repr(web3_error), 400
+
+
+    def sign_and_post_transaction(self, tx, tx_type, eth_wallet, w3):
+        retries = 10
+        delay = self.get_block_time() / retries
+        try:
+            # retrying only sendRawTransaction request to JSON-RPC server
+            for i in range(retries):
+                try:
+                    signed_tx = w3.eth.account.sign_transaction(tx, private_key=eth_wallet.privateKey)
+                    sent_tx = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                    break
+                except Exception as e:
+                    if i < retries - 1:
+                        time.sleep(delay)
+                        tx["nonce"] += 1
+                        delay += i + 1
+                        continue
+                    else:
+                        raise
+
+            # wait for it to return receipt
+            time.sleep(self.get_block_time())  # it cannot be faster than 2 seconds
+            tx_receipt = w3.eth.wait_for_transaction_receipt(sent_tx)
+            tx_link = (
+                    "https://mumbai.polygonscan.com/tx/"
+                    + tx_receipt.get("transactionHash").hex()
+            )
+
+        except Exception as web3_error:
+            return repr(web3_error), 400
+
+        if tx_receipt.get("status") == True:
+            return tx_link, 200
+
+        elif tx_receipt.get("status") == False:
+            # Failed
+
+            fail_reason = "unknown"
+            try:
+                # replay the transaction locally:
+                # build a new transaction to replay:
+                # fetch a reverted transaction:
+                tx = w3.eth.get_transaction(tx_receipt.get("transactionHash"))
+                replay_tx = {
+                    "to": tx["to"],
+                    "from": tx["from"],
+                    "value": tx["value"],
+                    "data": tx["input"],
+                }
+                w3.eth.call(replay_tx, tx.blockNumber - 1)
+            except Exception as e:
+                fail_reason = repr(e)
+
+            return f"{tx_type} failed. Reason: {fail_reason}. Link: {tx_link}", 400
+
+        else:
+            # Failed miserably
+            return "Trade failed.", 400
+
+
+    def get_gas_price(priority="fast"):
+        """Get standart gas price for the testnet"""
+        try:
+            # gas_price = int(w3.eth.gas_price * 15 / 10)
+            gas_price = w3.eth.gas_price
+        except:
+            gas_price = w3.toWei(10, "gwei")
+            print("RPC failed to provide gas price!")
+
+        return gas_price
+
+    def get_block_time(self):
+        """Get current block time"""
+        gas_station = "https://gasstation-mumbai.matic.today/v2"
+        block_time = self.TIME_BETWEEN_BLOCKS
+        try:
+            block_time = requests.get(gas_station).json()["blockTime"]
+        except Exception as e:
+            print("Polygon gas station is not working!")
+        return int(block_time)
+
+
+    def depositFundsToCosmosWallet(self, eth_mnemonic: [], asset: str, amount: int, eth_chain_id: int, dexilon_chain_id: str):
+        eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
+        eth_address = eth_wallet.address
+
+        deposit_funds_to_contract_response = self.deposit_funds_to_contract(eth_wallet, amount)
+
+
+        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
+        grantee_cosmos_wallet = generate_wallet()
+        grantee_cosmos_address = grantee_cosmos_wallet['address']
+
+        self.call_cosmos_faucet(grantee_cosmos_address)
+
+        self.grant_permission_to_grantee_wallet(grantee_cosmos_wallet, granter_cosmos_address.addressMapping, eth_wallet, eth_address, dexilon_chain_id)
+
+        account_info = self.get_cosmos_account_info(grantee_cosmos_address)
+
+        cosmos_account_number = account_info.account.account_number
+        cosmos_account_sequence = account_info.account.sequence
 
         # using given grant create deposit trading transaction wrapped to AuthZ module(authz_exec)
 
@@ -374,17 +563,20 @@ class DexilonClientImpl(DexilonClient):
         cosmos_tx_data["balance"] = str(amount)
         cosmos_tx_data["denom"] = asset
 
-        cosmo_tx.add_deposit(**cosmos_tx_data)
+        message_any = cosmo_tx.add_deposit_tx(**cosmos_tx_data)
 
-        tx_bytes = cosmo_tx.get_tx_bytes()
+        # tx_bytes = cosmo_tx.get_tx_bytes()
 
         print("Sending transaction for deposit to trading account")
 
+        self.send_auth_trasaction(message_any, grantee_cosmos_address, grantee_cosmos_wallet, dexilon_chain_id, granter_cosmos_address.addressMapping.cosmosAddress, eth_address)
+
+
+    def send_auth_trasaction(self, message, grantee_cosmos_address: str, grantee_cosmos_wallet, dexilon_chain_id: str, granter_cosmos_address: str, eth_address: str):
         account_info = self.get_cosmos_account_info(grantee_cosmos_address)
 
         cosmos_account_number = account_info.account.account_number
         cosmos_account_sequence = account_info.account.sequence
-
 
         cosmos_auth_tx = Transaction(
             privkey=grantee_cosmos_wallet["private_key"],
@@ -397,18 +589,67 @@ class DexilonClientImpl(DexilonClient):
             chain_id=dexilon_chain_id,
         )
 
-        cosmos_auth_tx.add_auth_tx(grantee_cosmos_address, tx_bytes)
+        cosmos_auth_tx_data = {}
+        cosmos_auth_tx_data["grantee"] = grantee_cosmos_address
+        cosmos_auth_tx_data["message"] = message
+
+        cosmos_auth_tx.add_auth_tx(**cosmos_auth_tx_data)
 
         cosmos_auth_tx_bytes = cosmos_auth_tx.get_tx_bytes()
 
         json_request_body = {'tx_bytes': cosmos_auth_tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
-        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body, model=dict)
+        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body,
+                                                              model=DexilonTransactionResponseInfo)
 
         if cosmos_faucet_response.tx_response.code is not 0:
             print("Error while sending request for registration to Dexilon network for " + granter_cosmos_address)
-            raise DexilonRequestException("Error trying to register new user in Dexilon network: " + granter_cosmos_address)
+            raise DexilonRequestException(
+                "Error trying to register new user in Dexilon network: " + granter_cosmos_address)
+
+        print(
+            "Cosmos Account " + granter_cosmos_address + " associated with ETH account " + eth_address + " was deposited successfully")
 
 
+    def withdraw_funds(self, eth_mnemonic: [], amount: int, asset: str, eth_chain_id: int, dexilon_chain_id: str,):
+        eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
+        eth_address = eth_wallet.address
+
+        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
+        grantee_cosmos_wallet = generate_wallet()
+        grantee_cosmos_address = grantee_cosmos_wallet['address']
+
+        self.call_cosmos_faucet(grantee_cosmos_address)
+
+        self.grant_permission_to_grantee_wallet(grantee_cosmos_wallet, granter_cosmos_address.addressMapping,
+                                                eth_wallet, eth_address, dexilon_chain_id)
+
+        account_info = self.get_cosmos_account_info(grantee_cosmos_address)
+
+        cosmos_account_number = account_info.account.account_number
+        cosmos_account_sequence = account_info.account.sequence
+
+        cosmos_auth_tx = Transaction(
+            privkey=grantee_cosmos_wallet["private_key"],
+            account_num=cosmos_account_number,
+            sequence=cosmos_account_sequence,
+            fee=0,
+            fee_denom="dxln",
+            gas=200_000,
+            memo="",
+            chain_id=dexilon_chain_id,
+        )
+
+        cosmos_withdraw_tx_data = {}
+
+        cosmos_withdraw_tx_data["granter"] = granter_cosmos_address
+        cosmos_withdraw_tx_data["amount"] = amount
+        cosmos_withdraw_tx_data["eth_chain_id"] = eth_chain_id
+        cosmos_withdraw_tx_data["denom"] = asset
+
+        message_any = cosmos_auth_tx.add_withdraw_tx(**cosmos_withdraw_tx_data)
+
+        self.send_auth_trasaction(message_any, grantee_cosmos_address, grantee_cosmos_wallet, dexilon_chain_id,
+                                  granter_cosmos_address.addressMapping.cosmosAddress, eth_address)
 
 
 
@@ -475,7 +716,7 @@ class DexilonClientImpl(DexilonClient):
 
         json_request_body = {'tx_bytes': tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
         cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body,
-                                                              model=DexilonRegistrationTransactionInfo)
+                                                              model=DexilonTransactionResponseInfo)
 
         if cosmos_faucet_response.tx_response.code is not 0:
             print("Error while sending request for registration to Dexilon network for " + cosmos_address)

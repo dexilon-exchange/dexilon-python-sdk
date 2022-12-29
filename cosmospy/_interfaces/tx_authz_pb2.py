@@ -10,12 +10,12 @@ from google.protobuf import symbol_database as _symbol_database
 
 _sym_db = _symbol_database.Default()
 
-import cosmos_pb2 as cosmos__pb2
-import gogo_pb2 as gogo__pb2
-import any_pb2 as any__pb2
-import authz_pb2 as authz__pb2
-import msg_pb2 as msg__pb2
-import amino_pb2 as amino__pb2
+import cosmospy._interfaces.cosmos_pb2 as cosmos__pb2
+import cosmospy._interfaces.gogo_pb2 as gogo__pb2
+import cosmospy._interfaces.any_pb2 as any__pb2
+import cosmospy._interfaces.authz_pb2 as authz__pb2
+import cosmospy._interfaces.msg_pb2 as msg__pb2
+import cosmospy._interfaces.amino_pb2 as amino__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(

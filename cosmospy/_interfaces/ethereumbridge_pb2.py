@@ -3,7 +3,6 @@
 # source: ethereumbridge.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
-from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -12,20 +11,338 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import gogo_pb2 as gogo__pb2
+import cosmospy._interfaces.gogo_pb2 as gogo__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x65thereumbridge.proto\x12(dexilonexchange.dexilonl2.ethereumbridge\x1a\ngogo.proto\"c\n\x0cMsgSignBatch\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61tchId\x18\x02 \x01(\x04\x12\x11\n\tsignature\x18\x03 \x01(\t\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x05 \x01(\t\"T\n\x10MsgBatchFinalize\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61tchId\x18\x02 \x01(\x04\x12\x0f\n\x07\x63hainId\x18\x03 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x04 \x01(\t\"\x12\n\x10MsgEmptyResponse\"\xaf\x01\n\x15MsgDepositTransaction\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0e\n\x06l1Hash\x18\x02 \x01(\t\x12\x15\n\rl1FromAddress\x18\x03 \x01(\t\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x05 \x01(\t\x12>\n\x06\x61mount\x18\x06 \x01(\tB.\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.Int\xc8\xde\x1f\x00\"\x1f\n\x1dMsgDepositTransactionResponse\"\x89\x01\n\x16MsgWithdrawTransaction\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\r\n\x05\x64\x65nom\x18\x02 \x01(\t\x12>\n\x06\x61mount\x18\x03 \x01(\tB.\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.Int\xc8\xde\x1f\x00\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\" \n\x1eMsgWithdrawTransactionResponse2\xdd\x04\n\x03Msg\x12\x7f\n\tSignBatch\x12\x36.dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch\x1a:.dexilonexchange.dexilonl2.ethereumbridge.MsgEmptyResponse\x12\x8f\x01\n\x15\x41pproveBatchFinalized\x12:.dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize\x1a:.dexilonexchange.dexilonl2.ethereumbridge.MsgEmptyResponse\x12\x9e\x01\n\x12\x44\x65positTransaction\x12?.dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction\x1aG.dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransactionResponse\x12\xa1\x01\n\x13WithdrawTransaction\x12@.dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction\x1aH.dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransactionResponseB>Z<github.com/dexilon-exchange/dexilonL2/x/ethereumbridge/typesb\x06proto3')
+DESCRIPTOR = _descriptor.FileDescriptor(
+  name='ethereumbridge.proto',
+  package='dexilonexchange.dexilonl2.ethereumbridge',
+  syntax='proto3',
+  serialized_options=b'Z<github.com/dexilon-exchange/dexilonL2/x/ethereumbridge/types',
+  create_key=_descriptor._internal_create_key,
+  serialized_pb=b'\n\x14\x65thereumbridge.proto\x12(dexilonexchange.dexilonl2.ethereumbridge\x1a\ngogo.proto\"c\n\x0cMsgSignBatch\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61tchId\x18\x02 \x01(\x04\x12\x11\n\tsignature\x18\x03 \x01(\t\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x05 \x01(\t\"T\n\x10MsgBatchFinalize\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61tchId\x18\x02 \x01(\x04\x12\x0f\n\x07\x63hainId\x18\x03 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x04 \x01(\t\"\x12\n\x10MsgEmptyResponse\"\xaf\x01\n\x15MsgDepositTransaction\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\x0e\n\x06l1Hash\x18\x02 \x01(\t\x12\x15\n\rl1FromAddress\x18\x03 \x01(\t\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\x12\r\n\x05\x64\x65nom\x18\x05 \x01(\t\x12>\n\x06\x61mount\x18\x06 \x01(\tB.\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.Int\xc8\xde\x1f\x00\"\x1f\n\x1dMsgDepositTransactionResponse\"\x89\x01\n\x16MsgWithdrawTransaction\x12\x0f\n\x07\x63reator\x18\x01 \x01(\t\x12\r\n\x05\x64\x65nom\x18\x02 \x01(\t\x12>\n\x06\x61mount\x18\x03 \x01(\tB.\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.Int\xc8\xde\x1f\x00\x12\x0f\n\x07\x63hainId\x18\x04 \x01(\r\" \n\x1eMsgWithdrawTransactionResponse2\xdd\x04\n\x03Msg\x12\x7f\n\tSignBatch\x12\x36.dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch\x1a:.dexilonexchange.dexilonl2.ethereumbridge.MsgEmptyResponse\x12\x8f\x01\n\x15\x41pproveBatchFinalized\x12:.dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize\x1a:.dexilonexchange.dexilonl2.ethereumbridge.MsgEmptyResponse\x12\x9e\x01\n\x12\x44\x65positTransaction\x12?.dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction\x1aG.dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransactionResponse\x12\xa1\x01\n\x13WithdrawTransaction\x12@.dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction\x1aH.dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransactionResponseB>Z<github.com/dexilon-exchange/dexilonL2/x/ethereumbridge/typesb\x06proto3'
+  ,
+  dependencies=[gogo__pb2.DESCRIPTOR,])
 
 
 
-_MSGSIGNBATCH = DESCRIPTOR.message_types_by_name['MsgSignBatch']
-_MSGBATCHFINALIZE = DESCRIPTOR.message_types_by_name['MsgBatchFinalize']
-_MSGEMPTYRESPONSE = DESCRIPTOR.message_types_by_name['MsgEmptyResponse']
-_MSGDEPOSITTRANSACTION = DESCRIPTOR.message_types_by_name['MsgDepositTransaction']
-_MSGDEPOSITTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['MsgDepositTransactionResponse']
-_MSGWITHDRAWTRANSACTION = DESCRIPTOR.message_types_by_name['MsgWithdrawTransaction']
-_MSGWITHDRAWTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['MsgWithdrawTransactionResponse']
+
+_MSGSIGNBATCH = _descriptor.Descriptor(
+  name='MsgSignBatch',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='creator', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch.creator', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='batchId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch.batchId', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='signature', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch.signature', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='chainId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch.chainId', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='denom', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgSignBatch.denom', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=78,
+  serialized_end=177,
+)
+
+
+_MSGBATCHFINALIZE = _descriptor.Descriptor(
+  name='MsgBatchFinalize',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='creator', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize.creator', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='batchId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize.batchId', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='chainId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize.chainId', index=2,
+      number=3, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='denom', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgBatchFinalize.denom', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=179,
+  serialized_end=263,
+)
+
+
+_MSGEMPTYRESPONSE = _descriptor.Descriptor(
+  name='MsgEmptyResponse',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgEmptyResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=265,
+  serialized_end=283,
+)
+
+
+_MSGDEPOSITTRANSACTION = _descriptor.Descriptor(
+  name='MsgDepositTransaction',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='creator', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.creator', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='l1Hash', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.l1Hash', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='l1FromAddress', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.l1FromAddress', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='chainId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.chainId', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='denom', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.denom', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='amount', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransaction.amount', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\332\336\037&github.com/cosmos/cosmos-sdk/types.Int\310\336\037\000', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=286,
+  serialized_end=461,
+)
+
+
+_MSGDEPOSITTRANSACTIONRESPONSE = _descriptor.Descriptor(
+  name='MsgDepositTransactionResponse',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgDepositTransactionResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=463,
+  serialized_end=494,
+)
+
+
+_MSGWITHDRAWTRANSACTION = _descriptor.Descriptor(
+  name='MsgWithdrawTransaction',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='creator', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction.creator', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='denom', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction.denom', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='amount', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction.amount', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\332\336\037&github.com/cosmos/cosmos-sdk/types.Int\310\336\037\000', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='chainId', full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction.chainId', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=497,
+  serialized_end=634,
+)
+
+
+_MSGWITHDRAWTRANSACTIONRESPONSE = _descriptor.Descriptor(
+  name='MsgWithdrawTransactionResponse',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransactionResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=636,
+  serialized_end=668,
+)
+
+DESCRIPTOR.message_types_by_name['MsgSignBatch'] = _MSGSIGNBATCH
+DESCRIPTOR.message_types_by_name['MsgBatchFinalize'] = _MSGBATCHFINALIZE
+DESCRIPTOR.message_types_by_name['MsgEmptyResponse'] = _MSGEMPTYRESPONSE
+DESCRIPTOR.message_types_by_name['MsgDepositTransaction'] = _MSGDEPOSITTRANSACTION
+DESCRIPTOR.message_types_by_name['MsgDepositTransactionResponse'] = _MSGDEPOSITTRANSACTIONRESPONSE
+DESCRIPTOR.message_types_by_name['MsgWithdrawTransaction'] = _MSGWITHDRAWTRANSACTION
+DESCRIPTOR.message_types_by_name['MsgWithdrawTransactionResponse'] = _MSGWITHDRAWTRANSACTIONRESPONSE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
 MsgSignBatch = _reflection.GeneratedProtocolMessageType('MsgSignBatch', (_message.Message,), {
   'DESCRIPTOR' : _MSGSIGNBATCH,
   '__module__' : 'ethereumbridge_pb2'
@@ -75,29 +392,64 @@ MsgWithdrawTransactionResponse = _reflection.GeneratedProtocolMessageType('MsgWi
   })
 _sym_db.RegisterMessage(MsgWithdrawTransactionResponse)
 
-_MSG = DESCRIPTOR.services_by_name['Msg']
-if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z<github.com/dexilon-exchange/dexilonL2/x/ethereumbridge/types'
-  _MSGDEPOSITTRANSACTION.fields_by_name['amount']._options = None
-  _MSGDEPOSITTRANSACTION.fields_by_name['amount']._serialized_options = b'\332\336\037&github.com/cosmos/cosmos-sdk/types.Int\310\336\037\000'
-  _MSGWITHDRAWTRANSACTION.fields_by_name['amount']._options = None
-  _MSGWITHDRAWTRANSACTION.fields_by_name['amount']._serialized_options = b'\332\336\037&github.com/cosmos/cosmos-sdk/types.Int\310\336\037\000'
-  _MSGSIGNBATCH._serialized_start=78
-  _MSGSIGNBATCH._serialized_end=177
-  _MSGBATCHFINALIZE._serialized_start=179
-  _MSGBATCHFINALIZE._serialized_end=263
-  _MSGEMPTYRESPONSE._serialized_start=265
-  _MSGEMPTYRESPONSE._serialized_end=283
-  _MSGDEPOSITTRANSACTION._serialized_start=286
-  _MSGDEPOSITTRANSACTION._serialized_end=461
-  _MSGDEPOSITTRANSACTIONRESPONSE._serialized_start=463
-  _MSGDEPOSITTRANSACTIONRESPONSE._serialized_end=494
-  _MSGWITHDRAWTRANSACTION._serialized_start=497
-  _MSGWITHDRAWTRANSACTION._serialized_end=634
-  _MSGWITHDRAWTRANSACTIONRESPONSE._serialized_start=636
-  _MSGWITHDRAWTRANSACTIONRESPONSE._serialized_end=668
-  _MSG._serialized_start=671
-  _MSG._serialized_end=1276
+DESCRIPTOR._options = None
+_MSGDEPOSITTRANSACTION.fields_by_name['amount']._options = None
+_MSGWITHDRAWTRANSACTION.fields_by_name['amount']._options = None
+
+_MSG = _descriptor.ServiceDescriptor(
+  name='Msg',
+  full_name='dexilonexchange.dexilonl2.ethereumbridge.Msg',
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=None,
+  create_key=_descriptor._internal_create_key,
+  serialized_start=671,
+  serialized_end=1276,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='SignBatch',
+    full_name='dexilonexchange.dexilonl2.ethereumbridge.Msg.SignBatch',
+    index=0,
+    containing_service=None,
+    input_type=_MSGSIGNBATCH,
+    output_type=_MSGEMPTYRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ApproveBatchFinalized',
+    full_name='dexilonexchange.dexilonl2.ethereumbridge.Msg.ApproveBatchFinalized',
+    index=1,
+    containing_service=None,
+    input_type=_MSGBATCHFINALIZE,
+    output_type=_MSGEMPTYRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='DepositTransaction',
+    full_name='dexilonexchange.dexilonl2.ethereumbridge.Msg.DepositTransaction',
+    index=2,
+    containing_service=None,
+    input_type=_MSGDEPOSITTRANSACTION,
+    output_type=_MSGDEPOSITTRANSACTIONRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='WithdrawTransaction',
+    full_name='dexilonexchange.dexilonl2.ethereumbridge.Msg.WithdrawTransaction',
+    index=3,
+    containing_service=None,
+    input_type=_MSGWITHDRAWTRANSACTION,
+    output_type=_MSGWITHDRAWTRANSACTIONRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_MSG)
+
+DESCRIPTOR.services_by_name['Msg'] = _MSG
+
 # @@protoc_insertion_point(module_scope)
