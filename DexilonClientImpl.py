@@ -31,7 +31,10 @@ class DexilonClientImpl(DexilonClient):
     API_URL = 'https://dex-dev2-api.cronrate.com/api/v1'
     COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
     COSMOS_FAUCET_API_URL = 'http://proxy.dev.dexilon.io'
+
     TIME_BETWEEN_BLOCKS = 5
+    BRIDGE_CONTRACT_ADDRESS = '0x52039E2f8263cE47afdBBB3E5124F22Fc87F557E'
+    TOKEN_ADDRESS = "0x8f54629e7d660871abab8a6b4809a839ded396de"
 
     DECIMALS_USDC = 6
 
@@ -364,7 +367,7 @@ class DexilonClientImpl(DexilonClient):
     def rpc_connect(self):
         # TODO: add Dexilon node here
         rpc_list = [
-            "https://polygon-mumbai.g.alchemy.com/v2/YSB9dpzl-6DQcXynxssJXUHJQIAvIk5r",
+            "https://polygon-mumbai.g.alchemy.com/v2/fjT6Ftkwr6805C0Guo_eicthIqtL1Yev",
             "https://rpc-mumbai.matic.today",
             "https://matic-mainnet.chainstacklabs.com",
             "https://rpc-mumbai.maticvigil.com",
@@ -385,7 +388,7 @@ class DexilonClientImpl(DexilonClient):
         user_address = eth_wallet.address
 
         userAddress = Web3.toChecksumAddress(user_address)
-        token_address = Web3.toChecksumAddress("0x8f54629e7d660871abab8a6b4809a839ded396de")
+        token_address = Web3.toChecksumAddress(self.TOKEN_ADDRESS)
         final_amount = int(
             int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
         )
@@ -393,16 +396,17 @@ class DexilonClientImpl(DexilonClient):
 
         approve_transaction_result = self.run_approve_transaction(userAddress, final_amount, eth_wallet, w3)
 
-        if isinstance(approve_transaction_result, tuple) is False or (len(approve_transaction_result) != 2 and approve_transaction_result[1] != 200):
+        if isinstance(approve_transaction_result, tuple) is False or len(approve_transaction_result) != 2 or approve_transaction_result[1] != 200:
             raise Exception("Approve transaction was not run correctly")
 
         deposit_contract = w3.eth.contract(
-            address="0x52039E2f8263cE47afdBBB3E5124F22Fc87F557E", abi=bridge_abi
+            address=self.BRIDGE_CONTRACT_ADDRESS, abi=bridge_abi
         )
 
         try:
             nonce = w3.eth.getTransactionCount(userAddress)
-            tx = deposit_contract.functions.deposit(token_address, amount).buildTransaction(
+            tx = deposit_contract.functions.deposit(Web3.toChecksumAddress(self.TOKEN_ADDRESS),
+                                                    final_amount).buildTransaction(
                 {
                     # "address": w3.eth.getTransactionCount(userAddress),
                     "nonce": nonce,
@@ -429,7 +433,8 @@ class DexilonClientImpl(DexilonClient):
 
         try:
             nonce = w3.eth.getTransactionCount(address)
-            tx = usdt_contract.functions.approve(address, amount).buildTransaction(
+            checksum_address = Web3.toChecksumAddress(address)
+            tx = usdt_contract.functions.approve(Web3.toChecksumAddress(self.TOKEN_ADDRESS), amount).buildTransaction(
                 {
                     "nonce": nonce,
                     "from": address,
