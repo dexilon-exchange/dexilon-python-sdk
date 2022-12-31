@@ -33,7 +33,8 @@ class DexilonClientImpl(DexilonClient):
     COSMOS_FAUCET_API_URL = 'http://proxy.dev.dexilon.io'
 
     TIME_BETWEEN_BLOCKS = 5
-    BRIDGE_CONTRACT_ADDRESS = '0x52039E2f8263cE47afdBBB3E5124F22Fc87F557E'
+    # BRIDGE_CONTRACT_ADDRESS = '0x52039E2f8263cE47afdBBB3E5124F22Fc87F557E'
+    BRIDGE_CONTRACT_ADDRESS = '0x1f4878d95d26C050D854D187De9d8FD4A8A3eE47'
     TOKEN_ADDRESS = "0x8f54629e7d660871abab8a6b4809a839ded396de"
 
     DECIMALS_USDC = 6
@@ -388,13 +389,8 @@ class DexilonClientImpl(DexilonClient):
         user_address = eth_wallet.address
 
         userAddress = Web3.toChecksumAddress(user_address)
-        token_address = Web3.toChecksumAddress(self.TOKEN_ADDRESS)
-        final_amount = int(
-            int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
-        )
-        timestamp = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
 
-        approve_transaction_result = self.run_approve_transaction(userAddress, final_amount, eth_wallet, w3)
+        approve_transaction_result = self.run_approve_transaction(userAddress, amount, eth_wallet, w3)
 
         if isinstance(approve_transaction_result, tuple) is False or len(approve_transaction_result) != 2 or approve_transaction_result[1] != 200:
             raise Exception("Approve transaction was not run correctly")
@@ -406,7 +402,7 @@ class DexilonClientImpl(DexilonClient):
         try:
             nonce = w3.eth.getTransactionCount(userAddress)
             tx = deposit_contract.functions.deposit(Web3.toChecksumAddress(self.TOKEN_ADDRESS),
-                                                    final_amount).buildTransaction(
+                                                    amount).buildTransaction(
                 {
                     # "address": w3.eth.getTransactionCount(userAddress),
                     "nonce": nonce,
@@ -428,13 +424,13 @@ class DexilonClientImpl(DexilonClient):
             usdt_abi = json.load(f)
 
         usdt_contract = w3.eth.contract(
-            address=Web3.toChecksumAddress("0x8f54629e7d660871abab8a6b4809a839ded396de"), abi=usdt_abi
+            address=Web3.toChecksumAddress(self.TOKEN_ADDRESS), abi=usdt_abi
         )
 
         try:
             nonce = w3.eth.getTransactionCount(address)
             checksum_address = Web3.toChecksumAddress(address)
-            tx = usdt_contract.functions.approve(Web3.toChecksumAddress(self.TOKEN_ADDRESS), amount).buildTransaction(
+            tx = usdt_contract.functions.approve(Web3.toChecksumAddress(self.BRIDGE_CONTRACT_ADDRESS), amount).buildTransaction(
                 {
                     "nonce": nonce,
                     "from": address,
@@ -534,7 +530,13 @@ class DexilonClientImpl(DexilonClient):
         eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
         eth_address = eth_wallet.address
 
-        deposit_funds_to_contract_response = self.deposit_funds_to_contract(eth_wallet, amount)
+        final_amount = int(
+            int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
+        )
+
+        deposit_funds_to_contract_response = self.deposit_funds_to_contract(eth_wallet, final_amount)
+
+        time.sleep(10)
 
 
         granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
@@ -563,9 +565,11 @@ class DexilonClientImpl(DexilonClient):
             chain_id=dexilon_chain_id,
         )
 
+        final_cosmos_amount = str(amount) + '000000000000000000'
+
         cosmos_tx_data = {}
-        cosmos_tx_data["recipient"] = granter_cosmos_address.addressMapping.cosmosAddress
-        cosmos_tx_data["balance"] = str(amount)
+        cosmos_tx_data["accountAddress"] = granter_cosmos_address.addressMapping.cosmosAddress
+        cosmos_tx_data["balance"] = final_cosmos_amount
         cosmos_tx_data["denom"] = asset
 
         message_any = cosmo_tx.add_deposit_tx(**cosmos_tx_data)
@@ -615,6 +619,7 @@ class DexilonClientImpl(DexilonClient):
             "Cosmos Account " + granter_cosmos_address + " associated with ETH account " + eth_address + " was deposited successfully")
 
 
+
     def withdraw_funds(self, eth_mnemonic: [], amount: int, asset: str, eth_chain_id: int, dexilon_chain_id: str,):
         eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
         eth_address = eth_wallet.address
@@ -646,8 +651,10 @@ class DexilonClientImpl(DexilonClient):
 
         cosmos_withdraw_tx_data = {}
 
-        cosmos_withdraw_tx_data["granter"] = granter_cosmos_address
-        cosmos_withdraw_tx_data["amount"] = amount
+        final_cosmos_amount = str(amount) + '000000000000000000'
+
+        cosmos_withdraw_tx_data["granter"] = granter_cosmos_address.addressMapping.cosmosAddress
+        cosmos_withdraw_tx_data["amount"] = final_cosmos_amount
         cosmos_withdraw_tx_data["eth_chain_id"] = eth_chain_id
         cosmos_withdraw_tx_data["denom"] = asset
 

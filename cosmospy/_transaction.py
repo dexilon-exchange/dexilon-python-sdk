@@ -64,15 +64,16 @@ class Transaction:
         msg_any.type_url = "/cosmos.bank.v1beta1.MsgSend"
         self._tx_body.messages.append(msg_any)
 
-    def add_deposit_tx(self, recipient: str, balance: str, denom: str = "usdt") -> None:
+    def add_deposit_tx(self, accountAddress: str, balance: str, denom: str = "usdt") -> None:
         msg = trade.DepositTradingBalanceRequest()
-        msg.accountAddress = recipient
+        msg.accountAddress = accountAddress
         msg.balance = balance
+        msg.asset = denom
 
         msg_any = Any.Any()
         msg_any.Pack(msg)
         msg_any.type_url = (
-            "/dexilon_exchange.dexilonl2.trading.DepositTradingBalanceRequest"
+            "/dexilon_exchange.dexilonL2.trading.DepositTradingBalanceRequest"
         )
         self._tx_body.messages.append(msg_any)
         return msg_any
@@ -88,7 +89,7 @@ class Transaction:
         msg_any = Any.Any()
         msg_any.Pack(msg)
         msg_any.type_url = (
-            "/dexilon_exchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction"
+            "/dexilonexchange.dexilonl2.ethereumbridge.MsgWithdrawTransaction"
         )
         self._tx_body.messages.append(msg_any)
         return msg_any

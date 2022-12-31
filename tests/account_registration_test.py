@@ -52,11 +52,11 @@ class TestAccountRegistration:
 
     def test_should_deposit_funds_successfully(self):
         eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
-        cosmos_deposit_update = self.test_instance.depositFundsToCosmosWallet(eth_test_mnemonic, 'usdt', 1, 80001, "dexilon-dev")
+        cosmos_deposit_update = self.test_instance.depositFundsToCosmosWallet(eth_test_mnemonic, 'usdt', 10, 80001, "dexilon-dev")
         assert cosmos_deposit_update is not None
 
 
     def test_should_withdraw_funds_successfully(self):
         eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
-        dexilon_withdraw_response = self.test_instance.withdraw_funds(eth_test_mnemonic, 1000000000000, 'usdt',  80001, "dexilon-dev")
+        dexilon_withdraw_response = self.test_instance.withdraw_funds(eth_test_mnemonic, 10, 'usdt',  80001, "dexilon-dev")
         assert dexilon_withdraw_response is not None
