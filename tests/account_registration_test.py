@@ -43,7 +43,6 @@ class TestAccountRegistration:
 
     def test_should_register_new_user_from_existing_mnemonics(self):
         cosmos_wallet = generate_wallet()
-        # cosmos_test_mnemonic = "derive blossom organ document arch rapid ginger invite attend radio scale hurry between payment defy distance february rough banner awful lock coral stock share"
         cosmos_test_mnemonic = cosmos_wallet["seed"]
         eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
         result = self.test_instance.registerUserWithExistingMnemonics(cosmos_test_mnemonic, eth_test_mnemonic, 80001, "dexilon-dev")
@@ -52,8 +51,8 @@ class TestAccountRegistration:
 
     def test_should_deposit_funds_successfully(self):
         eth_test_mnemonic = "witness offer document call session syrup cruel lumber develop feel student verify"
-        cosmos_deposit_update = self.test_instance.depositFundsToCosmosWallet(eth_test_mnemonic, 'usdt', 10, 80001, "dexilon-dev")
-        assert cosmos_deposit_update is not None
+        cosmos_deposit_update = self.test_instance.depositFundsToCosmosWallet(eth_test_mnemonic, 'usdt', 100, 80001, "dexilon-dev")
+        assert cosmos_deposit_update is True
 
 
     def test_should_withdraw_funds_successfully(self):

@@ -24,7 +24,8 @@ from SessionClient import SessionClient
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEvent, \
     ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse, DexilonAccountInfo, DexilonTransactionResponseInfo
+    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse, DexilonAccountInfo, DexilonTransactionResponseInfo, \
+    FundsTransferResponse
 
 
 class DexilonClientImpl(DexilonClient):
@@ -38,6 +39,9 @@ class DexilonClientImpl(DexilonClient):
     TOKEN_ADDRESS = "0x8f54629e7d660871abab8a6b4809a839ded396de"
 
     DECIMALS_USDC = 6
+
+    NUMBER_OF_RETRIES_WAITING_FOR_FUNDS_AT_CONTRACT = 10
+    DELAY_BETWEEN_RETRIES_WAITING_FOR_FUNDS_AT_CONTRACT = 10
 
     JWT_KEY = ''
     REFRESH_TOKEN = ''
@@ -163,6 +167,11 @@ class DexilonClientImpl(DexilonClient):
         leverage_request = {'symbol': symbol, 'leverage': leverage}
         return self._request('PUT', '/accounts/leverage', data=leverage_request, model=LeverageEvent)
 
+    def transfer_funds_from_trading_to_spot(self, amount: int, asset: str) -> FundsTransferResponse:
+        self.check_authentication()
+        transfer_funds_request = {'amount': amount, 'asset': asset}
+        return self._request('POST', '/balance/withdraw', data=transfer_funds_request, model=FundsTransferResponse)
+
     def _request(self, method: str, path: str, params: dict = None, data: dict = None,
                  model: BaseModel = None) -> BaseModel:
         return self.request_with_client(self.client, method, path, params, data, model)
@@ -263,9 +272,9 @@ class DexilonClientImpl(DexilonClient):
         if len(self.JWT_KEY) == 0:
             self.authenticate()
 
-    def sign(self, nonce: str) -> str:
+    def sign(self, nonce: str, private_key) -> str:
         return w3.eth.account.sign_message(
-            encode_defunct(nonce), private_key=self.pk1
+            encode_defunct(nonce), private_key=private_key
         ).signature.hex()
 
     def get_cosmos_address_mapping(self, eth_address: str):
@@ -281,20 +290,30 @@ class DexilonClientImpl(DexilonClient):
     def hash_keccak(self, message: str):
         return Web3.solidityKeccak(['string'], [message])
 
-    def authenticate(self):
 
-        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS)
+    def get_or_register_cosmos_address(self, eth_address: str):
+        dexilon_address = self.get_cosmos_address_mapping(eth_address)
         if dexilon_address.code is not None:
             print(
-                'There is no Dexilon chain mapping for Etherium address ' + self.METAMASK_ADDRESS + '. Registering user in Dexilon chain')
-            dexilon_chain_address = self.register_dexilon_user(self.METAMASK_ADDRESS)
+                'There is no Dexilon chain mapping for Etherium address ' + eth_address + '. Registering user in Dexilon chain')
+            return self.register_dexilon_user(eth_address)
         else:
-            dexilon_chain_address = dexilon_address.addressMapping.cosmosAddress
+            return dexilon_address.addressMapping.cosmosAddress
+
+    def authenticate(self, metamask_address: str = None, private_key = None):
+
+        if metamask_address is None:
+            metamask_address = self.METAMASK_ADDRESS
+
+        if private_key is None:
+            private_key = self.pk1
+
+        dexilon_chain_address = self.get_or_register_cosmos_address(metamask_address)
 
         cur_time_in_milliseconds = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
         nonce = str(cur_time_in_milliseconds) + '#' + dexilon_chain_address
         nonce_hashed = self.hash_keccak(nonce)
-        payload = {'ethAddress': self.METAMASK_ADDRESS, 'nonce': nonce, 'signedNonce': self.sign(nonce_hashed)}
+        payload = {'ethAddress': metamask_address, 'nonce': nonce, 'signedNonce': self.sign(nonce_hashed, private_key)}
 
         auth_info = self._request('POST', '/auth/accessToken', data=payload, model=JWTTokenResponse)
 
@@ -379,6 +398,9 @@ class DexilonClientImpl(DexilonClient):
             if w3.isConnected():
                 return w3
 
+    def verify_contract_response_is_success(self, response):
+        return isinstance(response, tuple) is True and len(response) == 2 and response[1] == 200
+
     def deposit_funds_to_contract(self, eth_wallet, amount: int):
 
         with open("../blockchain_abi/bridge_v10_abi.json", "r") as f:
@@ -392,7 +414,7 @@ class DexilonClientImpl(DexilonClient):
 
         approve_transaction_result = self.run_approve_transaction(userAddress, amount, eth_wallet, w3)
 
-        if isinstance(approve_transaction_result, tuple) is False or len(approve_transaction_result) != 2 or approve_transaction_result[1] != 200:
+        if not self.verify_contract_response_is_success(approve_transaction_result):
             raise Exception("Approve transaction was not run correctly")
 
         deposit_contract = w3.eth.contract(
@@ -404,7 +426,6 @@ class DexilonClientImpl(DexilonClient):
             tx = deposit_contract.functions.deposit(Web3.toChecksumAddress(self.TOKEN_ADDRESS),
                                                     amount).buildTransaction(
                 {
-                    # "address": w3.eth.getTransactionCount(userAddress),
                     "nonce": nonce,
                     "from": userAddress,
                     "gasPrice": self.get_gas_price(),
@@ -525,14 +546,20 @@ class DexilonClientImpl(DexilonClient):
             print("Polygon gas station is not working!")
         return int(block_time)
 
+    def get_final_eth_amount(self, amount: int):
+        return int(
+            int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
+        )
+
+
+    def get_final_cosmos_amount(self, amount:int) -> str :
+        return str(amount) + '000000000000000000'
 
     def depositFundsToCosmosWallet(self, eth_mnemonic: [], asset: str, amount: int, eth_chain_id: int, dexilon_chain_id: str):
         eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
         eth_address = eth_wallet.address
 
-        final_amount = int(
-            int(1_000_000 * float(amount)) * 10 ** self.DECIMALS_USDC / 1_000_000
-        )
+        final_amount = self.get_final_eth_amount(amount)
 
         deposit_funds_to_contract_response = self.deposit_funds_to_contract(eth_wallet, final_amount)
 
@@ -565,7 +592,7 @@ class DexilonClientImpl(DexilonClient):
             chain_id=dexilon_chain_id,
         )
 
-        final_cosmos_amount = str(amount) + '000000000000000000'
+        final_cosmos_amount = self.get_final_cosmos_amount(amount)
 
         cosmos_tx_data = {}
         cosmos_tx_data["accountAddress"] = granter_cosmos_address.addressMapping.cosmosAddress
@@ -611,18 +638,25 @@ class DexilonClientImpl(DexilonClient):
                                                               model=DexilonTransactionResponseInfo)
 
         if cosmos_faucet_response.tx_response.code is not 0:
-            print("Error while sending request for registration to Dexilon network for " + granter_cosmos_address)
+            print("Error while sending authorization request to Dexilon network for " + granter_cosmos_address)
             raise DexilonRequestException(
-                "Error trying to register new user in Dexilon network: " + granter_cosmos_address)
+                "Error trying to authorize transaction in Dexilon network: " + granter_cosmos_address)
 
         print(
             "Cosmos Account " + granter_cosmos_address + " associated with ETH account " + eth_address + " was deposited successfully")
+        return True
 
 
 
     def withdraw_funds(self, eth_mnemonic: [], amount: int, asset: str, eth_chain_id: int, dexilon_chain_id: str,):
         eth_wallet = self.get_eth_wallet_from_mnemonic(eth_mnemonic)
         eth_address = eth_wallet.address
+
+        headers_copy = self.headers.copy()
+        headers_copy['MetamaskAddress'] = eth_address
+
+        auth_client = SessionClient(self.API_URL, headers_copy)
+        sdlfkjsklf
 
         granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
         grantee_cosmos_wallet = generate_wallet()
@@ -651,7 +685,8 @@ class DexilonClientImpl(DexilonClient):
 
         cosmos_withdraw_tx_data = {}
 
-        final_cosmos_amount = str(amount) + '000000000000000000'
+        final_cosmos_amount = self.get_final_cosmos_amount(amount)
+        final_eth_amount = self.get_final_eth_amount(amount)
 
         cosmos_withdraw_tx_data["granter"] = granter_cosmos_address.addressMapping.cosmosAddress
         cosmos_withdraw_tx_data["amount"] = final_cosmos_amount
@@ -663,8 +698,67 @@ class DexilonClientImpl(DexilonClient):
         self.send_auth_trasaction(message_any, grantee_cosmos_address, grantee_cosmos_wallet, dexilon_chain_id,
                                   granter_cosmos_address.addressMapping.cosmosAddress, eth_address)
 
+        return self.check_money_arrived_to_contract_and_withdraw(eth_wallet, final_eth_amount)
 
 
+    def check_money_arrived_to_contract_and_withdraw(self, eth_wallet, eth_amount: int):
+        with open("../blockchain_abi/bridge_v10_abi.json", "r") as f:
+            bridge_abi = json.load(f)
+
+        w3 = self.rpc_connect()
+
+        user_address = eth_wallet.address
+
+        userAddress = Web3.toChecksumAddress(user_address)
+
+        bridge_contract = w3.eth.contract(
+            address=self.BRIDGE_CONTRACT_ADDRESS, abi=bridge_abi
+        )
+
+        self.wait_for_funds_arrive_to_contract(eth_amount, bridge_contract, userAddress)
+
+        try:
+            nonce = w3.eth.getTransactionCount(userAddress)
+            tx = bridge_contract.functions.withdraw(Web3.toChecksumAddress(self.TOKEN_ADDRESS)).buildTransaction(
+                {
+                    "nonce": nonce,
+                    "from": userAddress,
+                    "gasPrice": self.get_gas_price(),
+                    "gas": 200_000,
+                }
+            )
+
+            tx_response = self.sign_and_post_transaction(tx, "withdraw", eth_wallet, w3)
+
+            if not self.verify_contract_response_is_success(tx_response):
+                print("Error while trying to withdraw funds from the Contract to user's wallet:  " + eth_wallet)
+                return False
+
+            print("Funds were successfully withdrawn to user's wallet: " + eth_wallet)
+            return True
+
+        except Exception as web3_error:
+            return repr(web3_error), 400
+
+    def wait_for_funds_arrive_to_contract(self, amount, bridge_contract, userAddress):
+        current_try:int = 0
+        try:
+            while current_try <= self.NUMBER_OF_RETRIES_WAITING_FOR_FUNDS_AT_CONTRACT:
+                print("Checking for balance changed at the contract for user. Try " + str(current_try + 1))
+                current_contract_balance = bridge_contract.functions.getAvailableBalance(Web3.toChecksumAddress(self.TOKEN_ADDRESS),userAddress).call()
+
+                if current_contract_balance >= amount:
+                    print("Amount has changed and funds ready for withdraw: " + str(current_contract_balance))
+                    return True
+
+                print("Funds at contract has not been changed yet. Sleeping for " + str(self.DELAY_BETWEEN_RETRIES_WAITING_FOR_FUNDS_AT_CONTRACT) + " seconds to retry")
+                time.sleep(self.DELAY_BETWEEN_RETRIES_WAITING_FOR_FUNDS_AT_CONTRACT)
+                current_try = current_try + 1
+
+        except Exception as web3_error:
+            return repr(web3_error), 400
+
+        raise Exception("Contract amount has not been changed for the transaction within await time limit. Can not proceed with withdraw")
 
 
     def callCosmosFaucetForAddress(self, cosmos_address: str):

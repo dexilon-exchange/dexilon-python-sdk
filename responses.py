@@ -162,3 +162,7 @@ class DexilonTransactionInfoData(BaseModel):
 
 class DexilonTransactionResponseInfo(BaseModel):
     tx_response: DexilonTransactionInfoData
+
+
+class FundsTransferResponse(BaseModel):
+    amount: Optional[int]
