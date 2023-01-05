@@ -12,8 +12,7 @@ class TestTradingIntegration:
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
         self.test_instance.change_api_url('https://api.dev.dexilon.io/api/v1')
-        self.test_instance.change_cosmos_api_url('http://65.108.44.122:1317/dexilon-exchange/dexilonl2')
-        self.test_instance.change_cosmos_faucet_api_url('http://65.108.44.122:4000')
+        self.test_instance.change_dexilon_account_api_url('http://65.108.44.122:1317/dexilon-exchange/dexilonl2')
 
     def test_create_market_order(self):
         full_order_info = self.test_instance.market_order('0c3e662f-3143-e4c1-39f7-dafd2faa10bd', 'eth_usdt', 'BUY', 0.10)
