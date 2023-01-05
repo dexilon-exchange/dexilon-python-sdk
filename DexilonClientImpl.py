@@ -1,13 +1,8 @@
-import secrets
-from datetime import datetime, time
-from typing import List
 import logging
+from datetime import datetime
+from typing import List
 
 import requests as requests
-
-from _transaction import Transaction
-from cosmospy import generate_wallet, _wallet
-from eth_account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from pydantic import BaseModel, parse_obj_as
@@ -18,16 +13,16 @@ from DexilonClient import DexilonClient
 from ErrorBody import ErrorBody
 from OrderErrorInfo import OrderErrorInfo
 from SessionClient import SessionClient
+from cosmospy import _wallet
 from exceptions import DexilonAPIException, DexilonRequestException, DexilonAuthException
 from responses import AvailableSymbol, OrderBookInfo, JWTTokenResponse, OrderEvent, \
     ErrorBody, AccountInfo, OrderInfo, AllOpenOrders, \
-    CosmosAddressMapping, LeverageEvent, CosmosFaucetResponse, DexilonAccountInfo, DexilonRegistrationTransactionInfo
+    LeverageEvent, FundsTransferResponse, CosmosAddressMapping
 
 
 class DexilonClientImpl(DexilonClient):
     API_URL = 'https://dex-dev2-api.cronrate.com/api/v1'
     COSMOS_ADDRESS_API_URL = 'http://88.198.205.192:1317/dexilon-exchange/dexilonl2'
-    COSMOS_FAUCET_API_URL = 'http://proxy.dev.dexilon.io'
 
     JWT_KEY = ''
     REFRESH_TOKEN = ''
@@ -50,14 +45,9 @@ class DexilonClientImpl(DexilonClient):
         self.headers['MetamaskAddress'] = self.METAMASK_ADDRESS
         self.API_SECRET = api_secret
         self.pk1 = keys.PrivateKey(bytes.fromhex(api_secret))
-        # self.client: SessionClient = SessionClient(self.API_URL, self.headers)
-        # self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
-
-    def setup(self):
         self.client: SessionClient = SessionClient(self.API_URL, self.headers)
-        self.client.base_url = self.API_URL
         self.dex_session_client: SessionClient = SessionClient(self.COSMOS_ADDRESS_API_URL, self.cosmos_headers)
-        self.dex_faucet_client: SessionClient = SessionClient(self.COSMOS_FAUCET_API_URL, self.cosmos_headers)
+
 
     def change_api_url(self, api_url):
         """
@@ -68,22 +58,11 @@ class DexilonClientImpl(DexilonClient):
 
         """
         self.API_URL = api_url
-        # self.client.base_url = api_url
+        self.client.base_url = api_url
 
-    def change_cosmos_api_url(self, cosmos_api_url):
-        """
-        Used for testing purposes
-        :param cosmos_api_url:
-        :return:
-        """
-        self.COSMOS_ADDRESS_API_URL = cosmos_api_url
-        # self.dex_session_client.base_url = cosmos_api_url
-
-
-    def change_cosmos_faucet_api_url(self, cosmos_faucet_api_url):
-        self.COSMOS_FAUCET_API_URL = cosmos_faucet_api_url
-        self.dex_faucet_client.base_url = cosmos_faucet_api_url
-
+    def change_dexilon_account_api_url(self, dexilon_account_ai_url):
+        self.COSMOS_ADDRESS_API_URL = dexilon_account_ai_url
+        self.dex_session_client.base_url = dexilon_account_ai_url
 
     def get_open_orders(self) -> List[OrderInfo]:
         self.check_authentication()
@@ -151,6 +130,11 @@ class DexilonClientImpl(DexilonClient):
         leverage_request = {'symbol': symbol, 'leverage': leverage}
         return self._request('PUT', '/accounts/leverage', data=leverage_request, model=LeverageEvent)
 
+    def transfer_funds_from_trading_to_spot(self, amount: int, asset: str) -> FundsTransferResponse:
+        self.check_authentication()
+        transfer_funds_request = {'amount': amount, 'asset': asset}
+        return self._request('POST', '/balance/withdraw', data=transfer_funds_request, model=FundsTransferResponse)
+
     def _request(self, method: str, path: str, params: dict = None, data: dict = None,
                  model: BaseModel = None) -> BaseModel:
         return self.request_with_client(self.client, method, path, params, data, model)
@@ -167,16 +151,6 @@ class DexilonClientImpl(DexilonClient):
             model=model
         )
 
-    def _request_dexilon_faucet(self, method:str, path: str, params: dict = None, data: dict = None, model: BaseModel = None) -> BaseModel:
-        return self._handle_dexilon_response(
-            response=self.dex_faucet_client.request(
-                method=method,
-                path=path,
-                params=params,
-                data=data
-            ),
-            model=model
-        )
 
     def _handle_dexilon_response(self, response: dict, model: BaseModel = None) -> BaseModel:
         logging.debug("response: %s" % (response))
@@ -187,6 +161,7 @@ class DexilonClientImpl(DexilonClient):
             return parse_obj_as(model, response)
         else:
             return response
+
 
     def request_with_client(self, client, method: str, path: str, params: dict = None, data: dict = None,
                             model: BaseModel = None) -> BaseModel:
@@ -251,38 +226,44 @@ class DexilonClientImpl(DexilonClient):
         if len(self.JWT_KEY) == 0:
             self.authenticate()
 
-    def sign(self, nonce: str) -> str:
+    def sign(self, nonce: str, private_key) -> str:
         return w3.eth.account.sign_message(
-            encode_defunct(nonce), private_key=self.pk1
+            encode_defunct(nonce), private_key=private_key
         ).signature.hex()
+
+
+    def hash_keccak(self, message: str):
+        return Web3.solidityKeccak(['string'], [message])
+
+
+    def get_or_register_cosmos_address(self, eth_address: str):
+        dexilon_address = self.get_cosmos_address_mapping(eth_address)
+        if dexilon_address.code is not None:
+            print(
+                'There is no Dexilon chain mapping for Etherium address ' + eth_address + '. Registering user in Dexilon chain')
+            return self.register_dexilon_user(eth_address)
+        else:
+            return dexilon_address.addressMapping.cosmosAddress
 
     def get_cosmos_address_mapping(self, eth_address: str):
         cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + eth_address,
                                                            model=CosmosAddressMapping)
         return cosmos_maping_response
 
-    def call_cosmos_faucet(self, cosmos_address: str):
-        json_request_body = {'address': cosmos_address}
-        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/faucet', data=json_request_body, model=CosmosFaucetResponse)
-        return cosmos_faucet_response
+    def authenticate(self, metamask_address: str = None, private_key = None):
 
-    def hash_keccak(self, message: str):
-        return Web3.solidityKeccak(['string'], [message])
+        if metamask_address is None:
+            metamask_address = self.METAMASK_ADDRESS
 
-    def authenticate(self):
+        if private_key is None:
+            private_key = self.pk1
 
-        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS)
-        if dexilon_address.code is not None:
-            print(
-                'There is no Dexilon chain mapping for Etherium address ' + self.METAMASK_ADDRESS + '. Registering user in Dexilon chain')
-            dexilon_chain_address = self.register_dexilon_user(self.METAMASK_ADDRESS)
-        else:
-            dexilon_chain_address = dexilon_address.addressMapping.cosmosAddress
+        dexilon_chain_address = self.get_or_register_cosmos_address(metamask_address)
 
         cur_time_in_milliseconds = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
         nonce = str(cur_time_in_milliseconds) + '#' + dexilon_chain_address
         nonce_hashed = self.hash_keccak(nonce)
-        payload = {'ethAddress': self.METAMASK_ADDRESS, 'nonce': nonce, 'signedNonce': self.sign(nonce_hashed)}
+        payload = {'ethAddress': metamask_address, 'nonce': nonce, 'signedNonce': self.sign(nonce_hashed, private_key)}
 
         auth_info = self._request('POST', '/auth/accessToken', data=payload, model=JWTTokenResponse)
 
@@ -297,103 +278,6 @@ class DexilonClientImpl(DexilonClient):
         self.headers['CosmosAddress'] = dexilon_chain_address
         self.JWT_KEY = jwt_token
         self.REFRESH_TOKEN = refresh_token
-
-
-    def registerUserWithExistingMnemonics(self, cosmos_mnemonic:[], eth_mnemonic:[], eth_chain_id: int, dexilon_chain_id: str):
-        cosmos_wallet = self.generate_cosmos_wallet_from_mnemonic(cosmos_mnemonic)
-        Account.enable_unaudited_hdwallet_features()
-        eth_wallet = Account.from_mnemonic(eth_mnemonic)
-
-        return self.generate_new_cosmos_user(cosmos_wallet, eth_wallet, eth_chain_id, dexilon_chain_id)
-
-
-    def registerNewRandomUser(self, eth_chain_id: int, dexilon_chain_id: str):
-        cosmos_wallet = generate_wallet()
-        if 'address' not in cosmos_wallet:
-            raise DexilonRequestException('Was not able to generate Cosmos wallet')
-        eth_wallet = self.generate_random_eth_wallet()
-
-        return self.generate_new_cosmos_user(cosmos_wallet, eth_wallet, eth_chain_id, dexilon_chain_id)
-
-
-    def generate_new_cosmos_user(self, cosmos_wallet, eth_wallet, eth_chain_id: int, dexilon_chain_id: str):
-        cosmos_address = cosmos_wallet['address']
-        cosmos_faucet_response = self.call_cosmos_faucet(cosmos_address)
-
-        if not isinstance(cosmos_faucet_response, CosmosFaucetResponse):
-            raise DexilonRequestException('Was not able to receive response from faucet')
-
-        eth_address = eth_wallet.address
-
-        signature = self.getSignature(eth_wallet, cosmos_address)
-
-        account_info = self.get_cosmos_account_info(cosmos_address)
-
-        cosmos_account_number = account_info.account.account_number
-        cosmos_account_sequence = account_info.account.sequence
-
-        cosmo_tx = Transaction(
-            privkey=cosmos_wallet["private_key"],
-            account_num=cosmos_account_number,
-            sequence=cosmos_account_sequence,
-            fee=0,
-            fee_denom="dxln",
-            gas=200_000,
-            memo="",
-            chain_id=dexilon_chain_id,
-        )
-
-        cosmos_tx_data = {}
-        cosmos_tx_data["creator"] = cosmos_address
-        cosmos_tx_data["chainId"] = eth_chain_id
-        cosmos_tx_data["address"] = eth_address
-        cosmos_tx_data["signature"] = signature
-        cosmos_tx_data["signedMessage"] = cosmos_address
-
-        cosmo_tx.add_registration(**cosmos_tx_data)
-
-        tx_bytes = cosmo_tx.get_tx_bytes()
-
-        json_request_body = {'tx_bytes': tx_bytes, "mode": "BROADCAST_MODE_BLOCK"}
-        cosmos_faucet_response = self._request_dexilon_faucet('POST', '/cosmos/tx/v1beta1/txs', data=json_request_body,
-                                                              model=DexilonRegistrationTransactionInfo)
-
-        if cosmos_faucet_response.tx_response.code is not 0:
-            print("Error while sending request for registration to Dexilon network for " + cosmos_address)
-            raise DexilonRequestException("Error trying to register new user in Dexilon network: " + cosmos_address)
-
-        print("Dexilon user " + cosmos_address + " successfully registered")
-
-        return {
-            'cosmosAddress': cosmos_address,
-            'cosmosMnemonic': cosmos_wallet["seed"],
-            'cosmosPrivateKey': cosmos_wallet["private_key"],
-            'cosmosPublicKey': cosmos_wallet["public_key"],
-            'ethAddress': eth_wallet.address,
-            'ethPrivateKey': eth_wallet.privateKey.hex(),
-            'ethPublicKey': eth_wallet.key.hex()
-        }
-
-    def get_cosmos_account_info(self, cosmos_address: str) -> DexilonAccountInfo:
-        return self._request_dexilon_faucet('GET', '/cosmos/auth/v1beta1/accounts/' + cosmos_address, model=DexilonAccountInfo)
-
-    def wrapObject(self, value):
-        return {
-            'typeUrl': '/dexilon_exchange.dexilonL2.registration.MsgCreateAddressMapping',
-            'value': {
-                'messages': [
-                    {
-                        'typeUrl': '/dexilon_exchange.dexilonL2.registration.MsgCreateAddressMapping',
-                        'value' : value
-                    }
-                ]
-            }
-        }
-
-
-    def getSignature(self, eth_wallet, cosmos_address: str):
-        solidity_keccak256_hash = Web3.solidityKeccak(['string'], [cosmos_address])
-        return w3.eth.account.sign_message(encode_defunct(solidity_keccak256_hash), private_key=eth_wallet.privateKey).signature.hex()
 
 
     def _handle_response(self, response):
@@ -429,9 +313,6 @@ class DexilonClientImpl(DexilonClient):
             "address": cosmos_address,
         }
 
-    def generate_random_eth_wallet(self):
-        priv = secrets.token_hex(32)
-        private_key = '0x' + priv
-        acct = Account.from_key(private_key)
-        return acct
+
+
 

@@ -1,0 +1,57 @@
+syntax = "proto3";
+package dexilonexchange.dexilonl2.ethereumbridge;
+
+import "gogo.proto";
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/dexilon-exchange/dexilonL2/x/ethereumbridge/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc SignBatch(MsgSignBatch) returns (MsgEmptyResponse);
+  rpc ApproveBatchFinalized(MsgBatchFinalize) returns (MsgEmptyResponse);
+  rpc DepositTransaction(MsgDepositTransaction) returns (MsgDepositTransactionResponse);
+  rpc WithdrawTransaction(MsgWithdrawTransaction) returns (MsgWithdrawTransactionResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgSignBatch {
+  string creator = 1;
+  uint64 batchId = 2;
+  string signature = 3;
+  uint32 chainId = 4;
+  string denom = 5;
+}
+
+message MsgBatchFinalize {
+  string creator = 1;
+  uint64 batchId = 2;
+  uint32 chainId = 3;
+  string denom = 4;
+}
+
+message MsgEmptyResponse {}
+
+message MsgDepositTransaction {
+  string creator = 1;
+  string l1Hash = 2;
+  string l1FromAddress = 3;
+  uint32 chainId = 4;
+  string denom = 5;
+  string amount = 6 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+}
+
+message MsgDepositTransactionResponse {
+}
+
+message MsgWithdrawTransaction {
+  string creator = 1;
+  string denom = 2;
+  string amount = 3 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  uint32 chainId = 4;
+}
+
+message MsgWithdrawTransactionResponse {
+}
+// this line is used by starport scaffolding # proto/tx/message

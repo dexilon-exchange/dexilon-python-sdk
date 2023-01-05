@@ -3,11 +3,9 @@
 # source: tx.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
-from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -20,152 +18,522 @@ import cosmospy._interfaces.any_pb2 as any__pb2
 import cosmospy._interfaces.cosmos_pb2 as cosmos__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x08tx.proto\x12\x11\x63osmos.tx.v1beta1\x1a\ngogo.proto\x1a\ncoin.proto\x1a\rsigning.proto\x1a\tany.proto\x1a\x0c\x63osmos.proto"q\n\x02Tx\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x19.cosmos.tx.v1beta1.TxBody\x12.\n\tauth_info\x18\x02 \x01(\x0b\x32\x1b.cosmos.tx.v1beta1.AuthInfo\x12\x12\n\nsignatures\x18\x03 \x03(\x0c"H\n\x05TxRaw\x12\x12\n\nbody_bytes\x18\x01 \x01(\x0c\x12\x17\n\x0f\x61uth_info_bytes\x18\x02 \x01(\x0c\x12\x12\n\nsignatures\x18\x03 \x03(\x0c"`\n\x07SignDoc\x12\x12\n\nbody_bytes\x18\x01 \x01(\x0c\x12\x17\n\x0f\x61uth_info_bytes\x18\x02 \x01(\x0c\x12\x10\n\x08\x63hain_id\x18\x03 \x01(\t\x12\x16\n\x0e\x61\x63\x63ount_number\x18\x04 \x01(\x04"\xc7\x01\n\x06TxBody\x12&\n\x08messages\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\x12\x0c\n\x04memo\x18\x02 \x01(\t\x12\x16\n\x0etimeout_height\x18\x03 \x01(\x04\x12\x30\n\x11\x65xtension_options\x18\xff\x07 \x03(\x0b\x32\x14.google.protobuf.Any\x12=\n\x1enon_critical_extension_options\x18\xff\x0f \x03(\x0b\x32\x14.google.protobuf.Any"d\n\x08\x41uthInfo\x12\x33\n\x0csigner_infos\x18\x01 \x03(\x0b\x32\x1d.cosmos.tx.v1beta1.SignerInfo\x12#\n\x03\x66\x65\x65\x18\x02 \x01(\x0b\x32\x16.cosmos.tx.v1beta1.Fee"x\n\nSignerInfo\x12(\n\npublic_key\x18\x01 \x01(\x0b\x32\x14.google.protobuf.Any\x12.\n\tmode_info\x18\x02 \x01(\x0b\x32\x1b.cosmos.tx.v1beta1.ModeInfo\x12\x10\n\x08sequence\x18\x03 \x01(\x04"\x84\x01\n\x08ModeInfo\x12\x34\n\x06single\x18\x01 \x01(\x0b\x32".cosmos.tx.v1beta1.ModeInfo.SingleH\x00\x1a;\n\x06Single\x12\x31\n\x04mode\x18\x01 \x01(\x0e\x32#.cosmos.tx.signing.v1beta1.SignModeB\x05\n\x03sum"\xc9\x01\n\x03\x46\x65\x65\x12[\n\x06\x61mount\x18\x01 \x03(\x0b\x32\x19.cosmos.base.v1beta1.CoinB0\xc8\xde\x1f\x00\xaa\xdf\x1f(github.com/cosmos/cosmos-sdk/types.Coins\x12\x11\n\tgas_limit\x18\x02 \x01(\x04\x12\'\n\x05payer\x18\x03 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12)\n\x07granter\x18\x04 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressStringB\'Z%github.com/cosmos/cosmos-sdk/types/txb\x06proto3'
+DESCRIPTOR = _descriptor.FileDescriptor(
+  name='tx.proto',
+  package='cosmos.tx.v1beta1',
+  syntax='proto3',
+  serialized_options=b'Z%github.com/cosmos/cosmos-sdk/types/tx',
+  create_key=_descriptor._internal_create_key,
+  serialized_pb=b'\n\x08tx.proto\x12\x11\x63osmos.tx.v1beta1\x1a\ngogo.proto\x1a\ncoin.proto\x1a\rsigning.proto\x1a\tany.proto\x1a\x0c\x63osmos.proto\"q\n\x02Tx\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x19.cosmos.tx.v1beta1.TxBody\x12.\n\tauth_info\x18\x02 \x01(\x0b\x32\x1b.cosmos.tx.v1beta1.AuthInfo\x12\x12\n\nsignatures\x18\x03 \x03(\x0c\"H\n\x05TxRaw\x12\x12\n\nbody_bytes\x18\x01 \x01(\x0c\x12\x17\n\x0f\x61uth_info_bytes\x18\x02 \x01(\x0c\x12\x12\n\nsignatures\x18\x03 \x03(\x0c\"`\n\x07SignDoc\x12\x12\n\nbody_bytes\x18\x01 \x01(\x0c\x12\x17\n\x0f\x61uth_info_bytes\x18\x02 \x01(\x0c\x12\x10\n\x08\x63hain_id\x18\x03 \x01(\t\x12\x16\n\x0e\x61\x63\x63ount_number\x18\x04 \x01(\x04\"\xc7\x01\n\x06TxBody\x12&\n\x08messages\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\x12\x0c\n\x04memo\x18\x02 \x01(\t\x12\x16\n\x0etimeout_height\x18\x03 \x01(\x04\x12\x30\n\x11\x65xtension_options\x18\xff\x07 \x03(\x0b\x32\x14.google.protobuf.Any\x12=\n\x1enon_critical_extension_options\x18\xff\x0f \x03(\x0b\x32\x14.google.protobuf.Any\"d\n\x08\x41uthInfo\x12\x33\n\x0csigner_infos\x18\x01 \x03(\x0b\x32\x1d.cosmos.tx.v1beta1.SignerInfo\x12#\n\x03\x66\x65\x65\x18\x02 \x01(\x0b\x32\x16.cosmos.tx.v1beta1.Fee\"x\n\nSignerInfo\x12(\n\npublic_key\x18\x01 \x01(\x0b\x32\x14.google.protobuf.Any\x12.\n\tmode_info\x18\x02 \x01(\x0b\x32\x1b.cosmos.tx.v1beta1.ModeInfo\x12\x10\n\x08sequence\x18\x03 \x01(\x04\"\x84\x01\n\x08ModeInfo\x12\x34\n\x06single\x18\x01 \x01(\x0b\x32\".cosmos.tx.v1beta1.ModeInfo.SingleH\x00\x1a;\n\x06Single\x12\x31\n\x04mode\x18\x01 \x01(\x0e\x32#.cosmos.tx.signing.v1beta1.SignModeB\x05\n\x03sum\"\xc9\x01\n\x03\x46\x65\x65\x12[\n\x06\x61mount\x18\x01 \x03(\x0b\x32\x19.cosmos.base.v1beta1.CoinB0\xc8\xde\x1f\x00\xaa\xdf\x1f(github.com/cosmos/cosmos-sdk/types.Coins\x12\x11\n\tgas_limit\x18\x02 \x01(\x04\x12\'\n\x05payer\x18\x03 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressString\x12)\n\x07granter\x18\x04 \x01(\tB\x18\xd2\xb4-\x14\x63osmos.AddressStringB\'Z%github.com/cosmos/cosmos-sdk/types/txb\x06proto3'
+  ,
+  dependencies=[gogo__pb2.DESCRIPTOR,coin__pb2.DESCRIPTOR,signing__pb2.DESCRIPTOR,any__pb2.DESCRIPTOR,cosmos__pb2.DESCRIPTOR,])
+
+
+
+
+_TX = _descriptor.Descriptor(
+  name='Tx',
+  full_name='cosmos.tx.v1beta1.Tx',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='body', full_name='cosmos.tx.v1beta1.Tx.body', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='auth_info', full_name='cosmos.tx.v1beta1.Tx.auth_info', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='signatures', full_name='cosmos.tx.v1beta1.Tx.signatures', index=2,
+      number=3, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=95,
+  serialized_end=208,
 )
 
 
-_TX = DESCRIPTOR.message_types_by_name["Tx"]
-_TXRAW = DESCRIPTOR.message_types_by_name["TxRaw"]
-_SIGNDOC = DESCRIPTOR.message_types_by_name["SignDoc"]
-_TXBODY = DESCRIPTOR.message_types_by_name["TxBody"]
-_AUTHINFO = DESCRIPTOR.message_types_by_name["AuthInfo"]
-_SIGNERINFO = DESCRIPTOR.message_types_by_name["SignerInfo"]
-_MODEINFO = DESCRIPTOR.message_types_by_name["ModeInfo"]
-_MODEINFO_SINGLE = _MODEINFO.nested_types_by_name["Single"]
-_FEE = DESCRIPTOR.message_types_by_name["Fee"]
-Tx = _reflection.GeneratedProtocolMessageType(
-    "Tx",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TX,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.Tx)
-    },
+_TXRAW = _descriptor.Descriptor(
+  name='TxRaw',
+  full_name='cosmos.tx.v1beta1.TxRaw',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='body_bytes', full_name='cosmos.tx.v1beta1.TxRaw.body_bytes', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='auth_info_bytes', full_name='cosmos.tx.v1beta1.TxRaw.auth_info_bytes', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='signatures', full_name='cosmos.tx.v1beta1.TxRaw.signatures', index=2,
+      number=3, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=210,
+  serialized_end=282,
 )
+
+
+_SIGNDOC = _descriptor.Descriptor(
+  name='SignDoc',
+  full_name='cosmos.tx.v1beta1.SignDoc',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='body_bytes', full_name='cosmos.tx.v1beta1.SignDoc.body_bytes', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='auth_info_bytes', full_name='cosmos.tx.v1beta1.SignDoc.auth_info_bytes', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='chain_id', full_name='cosmos.tx.v1beta1.SignDoc.chain_id', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='account_number', full_name='cosmos.tx.v1beta1.SignDoc.account_number', index=3,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=284,
+  serialized_end=380,
+)
+
+
+_TXBODY = _descriptor.Descriptor(
+  name='TxBody',
+  full_name='cosmos.tx.v1beta1.TxBody',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='messages', full_name='cosmos.tx.v1beta1.TxBody.messages', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='memo', full_name='cosmos.tx.v1beta1.TxBody.memo', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='timeout_height', full_name='cosmos.tx.v1beta1.TxBody.timeout_height', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='extension_options', full_name='cosmos.tx.v1beta1.TxBody.extension_options', index=3,
+      number=1023, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='non_critical_extension_options', full_name='cosmos.tx.v1beta1.TxBody.non_critical_extension_options', index=4,
+      number=2047, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=383,
+  serialized_end=582,
+)
+
+
+_AUTHINFO = _descriptor.Descriptor(
+  name='AuthInfo',
+  full_name='cosmos.tx.v1beta1.AuthInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='signer_infos', full_name='cosmos.tx.v1beta1.AuthInfo.signer_infos', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='fee', full_name='cosmos.tx.v1beta1.AuthInfo.fee', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=584,
+  serialized_end=684,
+)
+
+
+_SIGNERINFO = _descriptor.Descriptor(
+  name='SignerInfo',
+  full_name='cosmos.tx.v1beta1.SignerInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='public_key', full_name='cosmos.tx.v1beta1.SignerInfo.public_key', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='mode_info', full_name='cosmos.tx.v1beta1.SignerInfo.mode_info', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sequence', full_name='cosmos.tx.v1beta1.SignerInfo.sequence', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=686,
+  serialized_end=806,
+)
+
+
+_MODEINFO_SINGLE = _descriptor.Descriptor(
+  name='Single',
+  full_name='cosmos.tx.v1beta1.ModeInfo.Single',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='mode', full_name='cosmos.tx.v1beta1.ModeInfo.Single.mode', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=875,
+  serialized_end=934,
+)
+
+_MODEINFO = _descriptor.Descriptor(
+  name='ModeInfo',
+  full_name='cosmos.tx.v1beta1.ModeInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='single', full_name='cosmos.tx.v1beta1.ModeInfo.single', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_MODEINFO_SINGLE, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='sum', full_name='cosmos.tx.v1beta1.ModeInfo.sum',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=809,
+  serialized_end=941,
+)
+
+
+_FEE = _descriptor.Descriptor(
+  name='Fee',
+  full_name='cosmos.tx.v1beta1.Fee',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='amount', full_name='cosmos.tx.v1beta1.Fee.amount', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\310\336\037\000\252\337\037(github.com/cosmos/cosmos-sdk/types.Coins', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='gas_limit', full_name='cosmos.tx.v1beta1.Fee.gas_limit', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='payer', full_name='cosmos.tx.v1beta1.Fee.payer', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\322\264-\024cosmos.AddressString', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='granter', full_name='cosmos.tx.v1beta1.Fee.granter', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\322\264-\024cosmos.AddressString', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=944,
+  serialized_end=1145,
+)
+
+_TX.fields_by_name['body'].message_type = _TXBODY
+_TX.fields_by_name['auth_info'].message_type = _AUTHINFO
+_TXBODY.fields_by_name['messages'].message_type = any__pb2._ANY
+_TXBODY.fields_by_name['extension_options'].message_type = any__pb2._ANY
+_TXBODY.fields_by_name['non_critical_extension_options'].message_type = any__pb2._ANY
+_AUTHINFO.fields_by_name['signer_infos'].message_type = _SIGNERINFO
+_AUTHINFO.fields_by_name['fee'].message_type = _FEE
+_SIGNERINFO.fields_by_name['public_key'].message_type = any__pb2._ANY
+_SIGNERINFO.fields_by_name['mode_info'].message_type = _MODEINFO
+_MODEINFO_SINGLE.fields_by_name['mode'].enum_type = signing__pb2._SIGNMODE
+_MODEINFO_SINGLE.containing_type = _MODEINFO
+_MODEINFO.fields_by_name['single'].message_type = _MODEINFO_SINGLE
+_MODEINFO.oneofs_by_name['sum'].fields.append(
+  _MODEINFO.fields_by_name['single'])
+_MODEINFO.fields_by_name['single'].containing_oneof = _MODEINFO.oneofs_by_name['sum']
+_FEE.fields_by_name['amount'].message_type = coin__pb2._COIN
+DESCRIPTOR.message_types_by_name['Tx'] = _TX
+DESCRIPTOR.message_types_by_name['TxRaw'] = _TXRAW
+DESCRIPTOR.message_types_by_name['SignDoc'] = _SIGNDOC
+DESCRIPTOR.message_types_by_name['TxBody'] = _TXBODY
+DESCRIPTOR.message_types_by_name['AuthInfo'] = _AUTHINFO
+DESCRIPTOR.message_types_by_name['SignerInfo'] = _SIGNERINFO
+DESCRIPTOR.message_types_by_name['ModeInfo'] = _MODEINFO
+DESCRIPTOR.message_types_by_name['Fee'] = _FEE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Tx = _reflection.GeneratedProtocolMessageType('Tx', (_message.Message,), {
+  'DESCRIPTOR' : _TX,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.Tx)
+  })
 _sym_db.RegisterMessage(Tx)
 
-TxRaw = _reflection.GeneratedProtocolMessageType(
-    "TxRaw",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TXRAW,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.TxRaw)
-    },
-)
+TxRaw = _reflection.GeneratedProtocolMessageType('TxRaw', (_message.Message,), {
+  'DESCRIPTOR' : _TXRAW,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.TxRaw)
+  })
 _sym_db.RegisterMessage(TxRaw)
 
-SignDoc = _reflection.GeneratedProtocolMessageType(
-    "SignDoc",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SIGNDOC,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.SignDoc)
-    },
-)
+SignDoc = _reflection.GeneratedProtocolMessageType('SignDoc', (_message.Message,), {
+  'DESCRIPTOR' : _SIGNDOC,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.SignDoc)
+  })
 _sym_db.RegisterMessage(SignDoc)
 
-TxBody = _reflection.GeneratedProtocolMessageType(
-    "TxBody",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TXBODY,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.TxBody)
-    },
-)
+TxBody = _reflection.GeneratedProtocolMessageType('TxBody', (_message.Message,), {
+  'DESCRIPTOR' : _TXBODY,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.TxBody)
+  })
 _sym_db.RegisterMessage(TxBody)
 
-AuthInfo = _reflection.GeneratedProtocolMessageType(
-    "AuthInfo",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _AUTHINFO,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.AuthInfo)
-    },
-)
+AuthInfo = _reflection.GeneratedProtocolMessageType('AuthInfo', (_message.Message,), {
+  'DESCRIPTOR' : _AUTHINFO,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.AuthInfo)
+  })
 _sym_db.RegisterMessage(AuthInfo)
 
-SignerInfo = _reflection.GeneratedProtocolMessageType(
-    "SignerInfo",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SIGNERINFO,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.SignerInfo)
-    },
-)
+SignerInfo = _reflection.GeneratedProtocolMessageType('SignerInfo', (_message.Message,), {
+  'DESCRIPTOR' : _SIGNERINFO,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.SignerInfo)
+  })
 _sym_db.RegisterMessage(SignerInfo)
 
-ModeInfo = _reflection.GeneratedProtocolMessageType(
-    "ModeInfo",
-    (_message.Message,),
-    {
-        "Single": _reflection.GeneratedProtocolMessageType(
-            "Single",
-            (_message.Message,),
-            {
-                "DESCRIPTOR": _MODEINFO_SINGLE,
-                "__module__": "tx_pb2"
-                # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.ModeInfo.Single)
-            },
-        ),
-        "DESCRIPTOR": _MODEINFO,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.ModeInfo)
-    },
-)
+ModeInfo = _reflection.GeneratedProtocolMessageType('ModeInfo', (_message.Message,), {
+
+  'Single' : _reflection.GeneratedProtocolMessageType('Single', (_message.Message,), {
+    'DESCRIPTOR' : _MODEINFO_SINGLE,
+    '__module__' : 'tx_pb2'
+    # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.ModeInfo.Single)
+    })
+  ,
+  'DESCRIPTOR' : _MODEINFO,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.ModeInfo)
+  })
 _sym_db.RegisterMessage(ModeInfo)
 _sym_db.RegisterMessage(ModeInfo.Single)
 
-Fee = _reflection.GeneratedProtocolMessageType(
-    "Fee",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _FEE,
-        "__module__": "tx_pb2"
-        # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.Fee)
-    },
-)
+Fee = _reflection.GeneratedProtocolMessageType('Fee', (_message.Message,), {
+  'DESCRIPTOR' : _FEE,
+  '__module__' : 'tx_pb2'
+  # @@protoc_insertion_point(class_scope:cosmos.tx.v1beta1.Fee)
+  })
 _sym_db.RegisterMessage(Fee)
 
-if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z%github.com/cosmos/cosmos-sdk/types/tx"
-    _FEE.fields_by_name["amount"]._options = None
-    _FEE.fields_by_name[
-        "amount"
-    ]._serialized_options = (
-        b"\310\336\037\000\252\337\037(github.com/cosmos/cosmos-sdk/types.Coins"
-    )
-    _FEE.fields_by_name["payer"]._options = None
-    _FEE.fields_by_name[
-        "payer"
-    ]._serialized_options = b"\322\264-\024cosmos.AddressString"
-    _FEE.fields_by_name["granter"]._options = None
-    _FEE.fields_by_name[
-        "granter"
-    ]._serialized_options = b"\322\264-\024cosmos.AddressString"
-    _TX._serialized_start = 95
-    _TX._serialized_end = 208
-    _TXRAW._serialized_start = 210
-    _TXRAW._serialized_end = 282
-    _SIGNDOC._serialized_start = 284
-    _SIGNDOC._serialized_end = 380
-    _TXBODY._serialized_start = 383
-    _TXBODY._serialized_end = 582
-    _AUTHINFO._serialized_start = 584
-    _AUTHINFO._serialized_end = 684
-    _SIGNERINFO._serialized_start = 686
-    _SIGNERINFO._serialized_end = 806
-    _MODEINFO._serialized_start = 809
-    _MODEINFO._serialized_end = 941
-    _MODEINFO_SINGLE._serialized_start = 875
-    _MODEINFO_SINGLE._serialized_end = 934
-    _FEE._serialized_start = 944
-    _FEE._serialized_end = 1145
+DESCRIPTOR._options = None
+_FEE.fields_by_name['amount']._options = None
+_FEE.fields_by_name['payer']._options = None
+_FEE.fields_by_name['granter']._options = None
 # @@protoc_insertion_point(module_scope)
