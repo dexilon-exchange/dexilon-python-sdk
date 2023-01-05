@@ -2,7 +2,7 @@ import time
 
 from DexilonClientImpl import DexilonClientImpl
 from OrderErrorInfo import OrderErrorInfo
-from responses import OrderEvent, LeverageEvent
+from responses import OrderEvent, LeverageEvent, FundsTransferResponse
 
 
 class TestTradingIntegration:
@@ -11,9 +11,8 @@ class TestTradingIntegration:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        # self.test_instance.change_api_url('https://dex-dev2-api.cronrate.com/api/v1')
-        self.test_instance.change_api_url('http://api.dev.dexilon.io/api/v1')
-        self.test_instance.change_cosmos_api_url('http://10.13.0.48:1317/dexilon-exchange/dexilonl2')
+        self.test_instance.change_api_url('https://api.dev.dexilon.io/api/v1')
+        self.test_instance.change_dexilon_account_api_url('http://65.108.44.122:1317/dexilon-exchange/dexilonl2')
 
     def test_create_market_order(self):
         full_order_info = self.test_instance.market_order('0c3e662f-3143-e4c1-39f7-dafd2faa10bd', 'eth_usdt', 'BUY', 0.10)
@@ -90,3 +89,11 @@ class TestTradingIntegration:
         self.test_instance.cancel_all_orders()
         leverage_update = self.test_instance.set_leverage('eth_usdt', 1)
         assert isinstance(leverage_update, LeverageEvent)
+
+
+    def test_should_transfer_funds_from_trading_to_spot(self):
+        test_transfer_amount = 10
+        transfer_result = self.test_instance.transfer_funds_from_trading_to_spot(test_transfer_amount, 'usdt')
+        assert transfer_result is not None
+        assert isinstance(transfer_result, FundsTransferResponse)
+        assert transfer_result.amount == test_transfer_amount

@@ -9,8 +9,8 @@ class TestAuthentication:
 
     def setup(self):
         self.test_instance = DexilonClientImpl(self.TEST_METAMASK_ADDRESS, self.TEST_PRIVATE_KEY)
-        self.test_instance.change_api_url('http://api.dev.dexilon.io/api/v1')
-        self.test_instance.change_cosmos_api_url('http://10.13.0.48:1317/dexilon-exchange/dexilonl2')
+        self.test_instance.change_api_url('https://api.dev.dexilon.io/api/v1')
+        self.test_instance.change_cosmos_api_url('https://proxy.dev.dexilon.io/dexilon-exchange/dexilonl2')
         # self.test_instance.change_api_url('https://testnet-v2-api.dexilon-dev.xyz/api/v1')
 
     def test_should_get_cosmos_address_mapping_successfully(self):

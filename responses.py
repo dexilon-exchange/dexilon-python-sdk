@@ -146,19 +146,25 @@ class FullOrderInfo(BaseModel):
 class LeverageEvent(BaseModel):
     leverage: int
 
+
 class DexilonAccount(BaseModel):
     type: Optional[str]
     address: Optional[str]
     account_number: Optional[int]
     sequence: Optional[int]
 
+
 class DexilonAccountInfo(BaseModel):
     account: Optional[DexilonAccount]
 
 
-class DexilonRegistrationInfoData(BaseModel):
+class DexilonTransactionInfoData(BaseModel):
     txhash: Optional[str]
     code: Optional[int]
 
-class DexilonRegistrationTransactionInfo(BaseModel):
-    tx_response: DexilonRegistrationInfoData
+class DexilonTransactionResponseInfo(BaseModel):
+    tx_response: DexilonTransactionInfoData
+
+
+class FundsTransferResponse(BaseModel):
+    amount: Optional[int]
