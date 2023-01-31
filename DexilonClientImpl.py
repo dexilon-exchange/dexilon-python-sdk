@@ -236,8 +236,8 @@ class DexilonClientImpl(DexilonClient):
         return Web3.solidityKeccak(['string'], [message])
 
 
-    def get_or_register_cosmos_address(self, eth_address: str):
-        dexilon_address = self.get_cosmos_address_mapping(eth_address)
+    def get_or_register_cosmos_address(self, eth_address: str, chain_id: str):
+        dexilon_address = self.get_cosmos_address_mapping(eth_address, chain_id)
         if dexilon_address.code is not None:
             print(
                 'There is no Dexilon chain mapping for Etherium address ' + eth_address + '. Registering user in Dexilon chain')
@@ -245,12 +245,12 @@ class DexilonClientImpl(DexilonClient):
         else:
             return dexilon_address.addressMapping.cosmosAddress
 
-    def get_cosmos_address_mapping(self, eth_address: str):
-        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + eth_address,
+    def get_cosmos_address_mapping(self, eth_address: str, chain_id: str):
+        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + chain_id + '/' + eth_address,
                                                            model=CosmosAddressMapping)
         return cosmos_maping_response
 
-    def authenticate(self, metamask_address: str = None, private_key = None):
+    def authenticate(self, metamask_address: str = None, private_key = None, chain_id: str = "80001"):
 
         if metamask_address is None:
             metamask_address = self.METAMASK_ADDRESS
@@ -258,7 +258,7 @@ class DexilonClientImpl(DexilonClient):
         if private_key is None:
             private_key = self.pk1
 
-        dexilon_chain_address = self.get_or_register_cosmos_address(metamask_address)
+        dexilon_chain_address = self.get_or_register_cosmos_address(metamask_address, chain_id)
 
         cur_time_in_milliseconds = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
         nonce = str(cur_time_in_milliseconds) + '#' + dexilon_chain_address

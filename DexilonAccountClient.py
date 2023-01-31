@@ -164,8 +164,8 @@ class DexilonAccountClient:
         else:
             return response
 
-    def get_cosmos_address_mapping(self, eth_address: str):
-        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + eth_address, model=CosmosAddressMapping)
+    def get_cosmos_address_mapping(self, eth_address: str, chain_id: str):
+        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + chain_id + '/' + eth_address, model=CosmosAddressMapping)
         return cosmos_maping_response
 
     def _request_dexilon_api(self, method: str, path: str, params: dict = None, data: dict = None,
@@ -426,7 +426,7 @@ class DexilonAccountClient:
 
         time.sleep(10)
 
-        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
+        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address, str(eth_chain_id))
         grantee_cosmos_wallet = generate_wallet()
         grantee_cosmos_address = grantee_cosmos_wallet['address']
 
@@ -521,7 +521,7 @@ class DexilonAccountClient:
         if not isinstance(transfer_funds_response, FundsTransferResponse) or transfer_funds_response.amount is not amount:
             raise DexilonRequestException("Was not able to transfer funds from Trading wallet to Spot")
 
-        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address)
+        granter_cosmos_address = self.get_cosmos_address_mapping(eth_address, str(eth_chain_id))
         grantee_cosmos_wallet = generate_wallet()
         grantee_cosmos_address = grantee_cosmos_wallet['address']
 
