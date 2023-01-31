@@ -266,8 +266,8 @@ class DexilonClientImpl(DexilonClient):
             encode_defunct(nonce), private_key=self.pk1
         ).signature.hex()
 
-    def get_cosmos_address_mapping(self, eth_address: str):
-        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + eth_address,
+    def get_cosmos_address_mapping(self, eth_address: str, chain_id: str):
+        cosmos_maping_response = self._request_dexilon_api('GET', '/registration/address_mapping/mirror/' + chain_id + '/' + eth_address,
                                                            model=CosmosAddressMapping)
         return cosmos_maping_response
 
@@ -275,8 +275,8 @@ class DexilonClientImpl(DexilonClient):
         return Web3.solidityKeccak(['string'], [message])
 
     def authenticate(self):
-
-        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS)
+        # TODO remove hardcode!
+        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS, "80001")
         if dexilon_address.code is not None:
             print(
                 'There is no Dexilon chain mapping for Etherium address ' + self.METAMASK_ADDRESS + '. Registering user in Dexilon chain')
