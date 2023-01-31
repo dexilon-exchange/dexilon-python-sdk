@@ -24,14 +24,10 @@ class AvailableSymbol(BaseModel):
     price24Percentage: Optional[float]
 
 
-class AddressCosmosMapping(BaseModel):
+class CosmosAddressMapping(BaseModel):
     chainId: int
     address: str
     cosmosAddress: str
-
-
-class CosmosAddressMapping(BaseModel):
-    addressMapping: Optional[AddressCosmosMapping]
     code: Optional[int]
     message: Optional[str]
 
