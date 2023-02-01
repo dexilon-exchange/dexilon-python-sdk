@@ -24,7 +24,7 @@ class TestAuthentication:
     def test_should_get_cosmos_address_mapping_successfully(self):
         cosmos_address_maping = self.test_instance.get_cosmos_address_mapping(self.TEST_METAMASK_ADDRESS)
         assert cosmos_address_maping is not None
-        # TODO add asserts 
+        # TODO add asserts
 
     def test_should_get_address_not_found_if_there_is_no_mapping(self):
         cosmos_address_maping = self.test_instance.get_cosmos_address_mapping(self.TEST_METAMASK_ADDRESS + "_WRONG")

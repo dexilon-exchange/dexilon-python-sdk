@@ -210,7 +210,7 @@ class DexilonClientImpl(DexilonClient):
 
     def _handle_response_new(self, response: dict, model: BaseModel = None) -> BaseModel:
         logging.debug("response: %s" % (response))
-        data: dict = response['body']
+        data: dict = response
         if data is None:
             error_body: dict = response.get('errorBody')
             if error_body:
