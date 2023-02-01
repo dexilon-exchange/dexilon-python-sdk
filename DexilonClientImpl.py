@@ -282,7 +282,7 @@ class DexilonClientImpl(DexilonClient):
                 'There is no Dexilon chain mapping for Etherium address ' + self.METAMASK_ADDRESS + '. Registering user in Dexilon chain')
             dexilon_chain_address = self.register_dexilon_user(self.METAMASK_ADDRESS)
         else:
-            dexilon_chain_address = dexilon_address.addressMapping.cosmosAddress
+            dexilon_chain_address = dexilon_address.cosmosAddress
 
         cur_time_in_milliseconds = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
         nonce = str(cur_time_in_milliseconds) + '#' + dexilon_chain_address
