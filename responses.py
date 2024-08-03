@@ -58,8 +58,8 @@ class JWTTokenResponse(BaseModel):
 
 class OrderEvent(BaseModel):
     orderId: Optional[str]
-    eventType: str
-    event: dict
+    # eventType: str
+    # event: dict
 
 
 class PositionInfo(BaseModel):

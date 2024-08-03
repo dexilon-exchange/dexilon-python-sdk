@@ -128,8 +128,8 @@ class DexilonClientImpl(DexilonClient):
         self.check_authentication()
         json_request_body = {'clientorderId': client_order_id, 'symbol': symbol, 'side': side, 'size': size,
                              'price': price}
-        limit_order_response = self._request('POST', '/orders/limit', data=json_request_body, model=OrderEvent)
-        return self.parse_order_info_response(limit_order_response, 'LIMIT', client_order_id)
+        limit_order_response = self._request('POST', '/orders/limit', data=json_request_body, model=None)
+        return limit_order_response # self.parse_order_info_response(limit_order_response, 'LIMIT', client_order_id)
 
     def cancel_all_orders(self) -> bool:
         self.check_authentication()
@@ -226,6 +226,14 @@ class DexilonClientImpl(DexilonClient):
                     'body and errorBody is empty in response %s' % json.dumps(response))
             service_response = parse_obj_as(ServiceResponse, response)
             return service_response
+        if 'code' in data and data.get('code') != 200:
+            raise DexilonErrorBodyException(
+                ErrorBody(
+                    code=data.get('code'),
+                    name=data.get('name'),
+                    details=data.get('details', [])
+                )
+            )
         if model:
             return parse_obj_as(model, data)
         else:
@@ -272,7 +280,7 @@ class DexilonClientImpl(DexilonClient):
         return cosmos_maping_response
 
     def hash_keccak(self, message: str):
-        return Web3.solidityKeccak(['string'], [message])
+        return Web3.solidity_keccak(['string'], [message])
 
     def authenticate(self):
         # TODO remove hardcode!
