@@ -276,7 +276,7 @@ class DexilonClientImpl(DexilonClient):
 
     def authenticate(self):
         # TODO remove hardcode!
-        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS, "80001")
+        dexilon_address = self.get_cosmos_address_mapping(self.METAMASK_ADDRESS, "137")
         if dexilon_address.code is not None:
             print(
                 'There is no Dexilon chain mapping for Etherium address ' + self.METAMASK_ADDRESS + '. Registering user in Dexilon chain')
